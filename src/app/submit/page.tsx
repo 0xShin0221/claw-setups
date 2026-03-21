@@ -273,11 +273,14 @@ function SubmitForm() {
 
         {/* Channels */}
         <div>
-          <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Channels{channels.length > 0 && (
-              <span className="text-zinc-500 font-normal ml-1">({channels.length} selected)</span>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">
+            Channels{" "}
+            <span className="text-xs text-zinc-400 border border-zinc-600 rounded px-1.5 py-0.5 ml-1">optional</span>
+            {channels.length > 0 && (
+              <span className="text-zinc-500 font-normal ml-2">({channels.length} selected)</span>
             )}
           </label>
+          <p className="text-xs text-zinc-500 mb-2">Select all that apply</p>
           <div className="flex flex-wrap gap-2">
             {CHANNELS.map((ch) => {
               const selected = channels.includes(ch);
@@ -322,11 +325,14 @@ function SubmitForm() {
 
         {/* Skills */}
         <div>
-          <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Skills{skills.length > 0 && (
-              <span className="text-zinc-500 font-normal ml-1">({skills.length} selected)</span>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">
+            Skills{" "}
+            <span className="text-xs text-zinc-400 border border-zinc-600 rounded px-1.5 py-0.5 ml-1">optional</span>
+            {skills.length > 0 && (
+              <span className="text-zinc-500 font-normal ml-2">({skills.length} selected)</span>
             )}
           </label>
+          <p className="text-xs text-zinc-500 mb-2">Select all that apply</p>
           <div className="flex flex-wrap gap-2">
             {AVAILABLE_SKILLS.map((skill) => {
               const selected = skills.includes(skill);
@@ -383,7 +389,7 @@ function SubmitForm() {
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
             SOUL.md{" "}
-            <span className="text-xs text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">optional</span>
+            <span className="text-xs text-zinc-400 border border-zinc-600 rounded px-1.5 py-0.5">optional</span>
           </label>
           <textarea
             value={soulMd}
@@ -401,7 +407,7 @@ function SubmitForm() {
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
             AGENTS.md{" "}
-            <span className="text-xs text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">optional</span>
+            <span className="text-xs text-zinc-400 border border-zinc-600 rounded px-1.5 py-0.5">optional</span>
           </label>
           <textarea
             value={agentsMd}
