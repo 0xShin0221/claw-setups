@@ -1,0 +1,126 @@
+name: Review Community Submission
+
+on:
+  pull_request:
+    types: [opened, labeled]
+
+jobs:
+  review:
+    if: contains(github.event.pull_request.labels.*.name, 'community-submission')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Find and review new setup files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Find new/modified JSON files in data/setups/
+            const setupDir = 'data/setups';
+            const files = fs.readdirSync(setupDir).filter(f => f.endsWith('.json'));
+
+            const SECRET_PATTERNS = [
+              /api_key/i, /apikey/i, /\btoken\b/i, /\bsecret\b/i,
+              /password/i, /passwd/i, /\bbearer\b/i, /authorization/i,
+              /\bsk-[a-zA-Z0-9]{20,}/, /\bghp_[a-zA-Z0-9]{36,}/,
+              /\bgho_[a-zA-Z0-9]{36,}/, /\br8_[a-zA-Z0-9]{20,}/,
+            ];
+
+            const REQUIRED_FIELDS = ['id', 'title', 'description', 'useCase', 'model', 'config'];
+            const issues = [];
+            let reviewed = false;
+
+            // Get changed files in this PR
+            const { data: prFiles } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const changedSetups = prFiles
+              .filter(f => f.filename.startsWith('data/setups/') && f.filename.endsWith('.json'))
+              .map(f => path.basename(f.filename));
+
+            for (const file of changedSetups) {
+              reviewed = true;
+              const filePath = path.join(setupDir, file);
+
+              if (!fs.existsSync(filePath)) continue;
+
+              let data;
+              try {
+                data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              } catch (e) {
+                issues.push(`\`${file}\`: Invalid JSON - ${e.message}`);
+                continue;
+              }
+
+              // Check required fields
+              for (const field of REQUIRED_FIELDS) {
+                if (!data[field]) {
+                  issues.push(`\`${file}\`: Missing required field \`${field}\``);
+                }
+              }
+
+              // Scan for secrets in the raw content
+              const raw = fs.readFileSync(filePath, 'utf8');
+              for (const pattern of SECRET_PATTERNS) {
+                // Skip if the match is a key name in JSON (not a value)
+                const keyValueRegex = new RegExp(`"[^"]*"\\s*:\\s*"([^"]*)"`, 'g');
+                let match;
+                while ((match = keyValueRegex.exec(raw)) !== null) {
+                  const value = match[1];
+                  if (value !== '***REDACTED***' && pattern.test(value)) {
+                    issues.push(`\`${file}\`: Potential secret found in value (pattern: ${pattern})`);
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (!reviewed) {
+              console.log('No setup files changed in this PR');
+              return;
+            }
+
+            const prNumber = context.issue.number;
+
+            if (issues.length === 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: ['approved'],
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: '✅ **Auto-review passed.** Ready for merge.\n\nAll required fields present. No secrets detected.',
+              });
+            } else {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: ['needs-review'],
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `⚠️ **Auto-review found issues:**\n\n${issues.map(i => `- ${i}`).join('\n')}\n\nPlease address these before merging.`,
+              });
+            }

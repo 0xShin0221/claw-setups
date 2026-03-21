@@ -12,6 +12,15 @@ export default function Footer() {
           >
             Built by Shin0221 with AI family
           </a>
+          {" · "}
+          <a
+            href="https://buymeacoffee.com/shin0221"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-yellow-500 hover:text-yellow-400 transition-colors"
+          >
+            ☕ Buy me a coffee
+          </a>
         </p>
         <div className="flex items-center gap-4">
           <a

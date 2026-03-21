@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { CHANNELS, MODELS, USE_CASES } from "@/lib/constants";
 import { sanitizeConfig } from "@/lib/sanitizer";
@@ -36,6 +36,16 @@ function SubmitForm() {
   const [agentsMd, setAgentsMd] = useState("");
   const [sanitizeResult, setSanitizeResult] = useState<{ secretsFound: number } | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [prUrl, setPrUrl] = useState("");
+  const [forkTitle, setForkTitle] = useState("");
+
+  // JSON validation
+  const [jsonError, setJsonError] = useState("");
+
+  // Custom validation errors
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Load fork data
   useEffect(() => {
@@ -43,12 +53,13 @@ function SubmitForm() {
       fetch(`/api/setup/${forkId}`)
         .then((res) => res.json())
         .then((setup) => {
+          setForkTitle(setup.title || forkId);
           setTitle(`${setup.title} (fork)`);
           setDescription(setup.description);
           setUseCase(setup.useCase);
-          setChannels(setup.channels);
+          setChannels(setup.channels || []);
           setModel(setup.model);
-          setSkills(setup.skills);
+          setSkills(setup.skills || []);
           setConfigText(JSON.stringify(setup.config, null, 2));
           if (setup.workspaceFiles?.["SOUL.md"]) setSoulMd(setup.workspaceFiles["SOUL.md"]);
           if (setup.workspaceFiles?.["AGENTS.md"]) setAgentsMd(setup.workspaceFiles["AGENTS.md"]);
@@ -59,18 +70,35 @@ function SubmitForm() {
 
   const handleConfigChange = (value: string) => {
     setConfigText(value);
-    if (value.trim()) {
-      const result = sanitizeConfig(value);
+    // Clear JSON error while typing — validate on blur
+    if (jsonError) setJsonError("");
+  };
+
+  const validateJson = useCallback(() => {
+    if (!configText.trim()) {
+      setJsonError("");
+      setSanitizeResult(null);
+      return;
+    }
+    try {
+      JSON.parse(configText);
+      setJsonError("");
+      // Only run sanitizer on valid JSON
+      const result = sanitizeConfig(configText);
       setSanitizeResult(result);
-    } else {
+    } catch {
+      setJsonError("Invalid JSON");
       setSanitizeResult(null);
     }
-  };
+  }, [configText]);
 
   const toggleChannel = (ch: string) => {
     setChannels((prev) =>
       prev.includes(ch) ? prev.filter((c) => c !== ch) : [...prev, ch]
     );
+    if (fieldErrors.channels) {
+      setFieldErrors((prev) => { const next = { ...prev }; delete next.channels; return next; });
+    }
   };
 
   const toggleSkill = (skill: string) => {
@@ -79,10 +107,61 @@ function SubmitForm() {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
+    }
+  };
+
+  const validate = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!title.trim()) errors.title = "Title is required";
+    if (!description.trim()) errors.description = "Description is required";
+    if (!useCase) errors.useCase = "Use case is required";
+    if (!model) errors.model = "Model is required";
+    if (!configText.trim()) {
+      errors.config = "Configuration is required";
+    } else {
+      try {
+        JSON.parse(configText);
+      } catch {
+        errors.config = "Configuration must be valid JSON";
+      }
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In production this would create a GitHub PR
-    setSubmitted(true);
+    if (!validate()) return;
+    setSubmitting(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title, description, useCase, channels, model, skills,
+          configText, soulMd, agentsMd,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Submission failed. Please try again.");
+        return;
+      }
+
+      setPrUrl(data.prUrl);
+      setSubmitted(true);
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -94,6 +173,17 @@ function SubmitForm() {
           Your setup has been submitted as a GitHub PR. It will appear in the
           gallery once approved.
         </p>
+        {prUrl && (
+          <a
+            href={prUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-[#E8404A] hover:bg-[#d63840] text-white px-6 py-2.5 rounded-lg transition-colors font-medium mb-4"
+          >
+            View Pull Request
+          </a>
+        )}
+        <br />
         <a
           href="/"
           className="text-[#E8404A] hover:text-[#d63840] transition-colors"
@@ -104,6 +194,10 @@ function SubmitForm() {
     );
   }
 
+  const inputBase = "w-full bg-zinc-900 border rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#E8404A]/50 focus:border-[#E8404A]/50 transition-colors";
+  const inputOk = `${inputBase} border-zinc-800`;
+  const inputErr = `${inputBase} border-red-500/60`;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">Submit a Setup</h1>
@@ -112,47 +206,60 @@ function SubmitForm() {
         will create a GitHub PR for review.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Fork banner */}
+      {forkId && (
+        <div className="bg-zinc-800/60 border border-zinc-700 text-zinc-300 text-sm px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+          <span className="text-lg">🍴</span>
+          <span>Forked from <strong>{forkTitle || forkId}</strong></span>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm px-4 py-3 rounded-lg mb-6 font-medium">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Title */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Title
+            Title <span className="text-red-400">*</span>
           </label>
           <input
             type="text"
-            required
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => { setTitle(e.target.value); clearFieldError("title"); }}
             placeholder="e.g. My Telegram Bot Setup"
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-[#E8404A]/50"
+            className={fieldErrors.title ? inputErr : inputOk}
           />
+          {fieldErrors.title && <p className="text-red-400 text-xs mt-1">{fieldErrors.title}</p>}
         </div>
 
         {/* Description */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Description
+            Description <span className="text-red-400">*</span>
           </label>
           <textarea
-            required
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => { setDescription(e.target.value); clearFieldError("description"); }}
             rows={3}
             placeholder="What does this setup do? Who is it for?"
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-[#E8404A]/50 resize-none"
+            className={`${fieldErrors.description ? inputErr : inputOk} resize-none`}
           />
+          {fieldErrors.description && <p className="text-red-400 text-xs mt-1">{fieldErrors.description}</p>}
         </div>
 
         {/* Use Case */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Use Case
+            Use Case <span className="text-red-400">*</span>
           </label>
           <select
-            required
             value={useCase}
-            onChange={(e) => setUseCase(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-300 focus:outline-none focus:border-[#E8404A]/50"
+            onChange={(e) => { setUseCase(e.target.value); clearFieldError("useCase"); }}
+            className={fieldErrors.useCase ? inputErr : inputOk}
           >
             <option value="">Select a use case</option>
             {USE_CASES.map((uc) => (
@@ -161,41 +268,47 @@ function SubmitForm() {
               </option>
             ))}
           </select>
+          {fieldErrors.useCase && <p className="text-red-400 text-xs mt-1">{fieldErrors.useCase}</p>}
         </div>
 
         {/* Channels */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Channels
+            Channels{channels.length > 0 && (
+              <span className="text-zinc-500 font-normal ml-1">({channels.length} selected)</span>
+            )}
           </label>
           <div className="flex flex-wrap gap-2">
-            {CHANNELS.map((ch) => (
-              <button
-                key={ch}
-                type="button"
-                onClick={() => toggleChannel(ch)}
-                className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
-                  channels.includes(ch)
-                    ? "bg-[#E8404A]/20 border-[#E8404A]/50 text-[#E8404A]"
-                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                }`}
-              >
-                {ch.charAt(0).toUpperCase() + ch.slice(1)}
-              </button>
-            ))}
+            {CHANNELS.map((ch) => {
+              const selected = channels.includes(ch);
+              return (
+                <button
+                  key={ch}
+                  type="button"
+                  onClick={() => toggleChannel(ch)}
+                  className={`text-sm px-3 py-1.5 rounded-lg border transition-all ${
+                    selected
+                      ? "bg-[#E8404A] border-[#E8404A] text-white font-medium shadow-sm shadow-[#E8404A]/20"
+                      : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300"
+                  }`}
+                >
+                  {selected && <span className="mr-1">✓</span>}
+                  {ch.charAt(0).toUpperCase() + ch.slice(1)}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Model */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Model
+            Model <span className="text-red-400">*</span>
           </label>
           <select
-            required
             value={model}
-            onChange={(e) => setModel(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-300 focus:outline-none focus:border-[#E8404A]/50"
+            onChange={(e) => { setModel(e.target.value); clearFieldError("model"); }}
+            className={fieldErrors.model ? inputErr : inputOk}
           >
             <option value="">Select a model</option>
             {MODELS.map((m) => (
@@ -204,35 +317,42 @@ function SubmitForm() {
               </option>
             ))}
           </select>
+          {fieldErrors.model && <p className="text-red-400 text-xs mt-1">{fieldErrors.model}</p>}
         </div>
 
         {/* Skills */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Skills
+            Skills{skills.length > 0 && (
+              <span className="text-zinc-500 font-normal ml-1">({skills.length} selected)</span>
+            )}
           </label>
           <div className="flex flex-wrap gap-2">
-            {AVAILABLE_SKILLS.map((skill) => (
-              <button
-                key={skill}
-                type="button"
-                onClick={() => toggleSkill(skill)}
-                className={`text-xs px-2.5 py-1 rounded border transition-colors ${
-                  skills.includes(skill)
-                    ? "bg-[#E8404A]/20 border-[#E8404A]/50 text-[#E8404A]"
-                    : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700"
-                }`}
-              >
-                {skill}
-              </button>
-            ))}
+            {AVAILABLE_SKILLS.map((skill) => {
+              const selected = skills.includes(skill);
+              return (
+                <button
+                  key={skill}
+                  type="button"
+                  onClick={() => toggleSkill(skill)}
+                  className={`text-xs px-2.5 py-1 rounded-md border transition-all ${
+                    selected
+                      ? "bg-[#E8404A] border-[#E8404A] text-white font-medium shadow-sm shadow-[#E8404A]/20"
+                      : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-400"
+                  }`}
+                >
+                  {selected && <span className="mr-1">✓</span>}
+                  {skill}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Config JSON */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            Configuration (openclaw.json)
+            Configuration (openclaw.json) <span className="text-red-400">*</span>
           </label>
           {sanitizeResult && sanitizeResult.secretsFound > 0 && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm px-3 py-2 rounded-lg mb-2 flex items-center gap-2">
@@ -242,48 +362,65 @@ function SubmitForm() {
               {sanitizeResult.secretsFound} secret{sanitizeResult.secretsFound > 1 ? "s" : ""} will be masked before submission
             </div>
           )}
+          {jsonError && (
+            <div className="text-red-400 text-xs mb-1.5">{jsonError}</div>
+          )}
           <textarea
-            required
             value={configText}
-            onChange={(e) => handleConfigChange(e.target.value)}
+            onChange={(e) => { handleConfigChange(e.target.value); clearFieldError("config"); }}
+            onBlur={validateJson}
             rows={12}
             placeholder='{"version": "1.0", "name": "My Bot", ...}'
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-[#E8404A]/50 font-mono text-sm resize-none"
+            className={`${fieldErrors.config || jsonError ? inputErr : inputOk} font-mono text-sm resize-none`}
           />
+          <div className="flex justify-between mt-1">
+            {fieldErrors.config && <p className="text-red-400 text-xs">{fieldErrors.config}</p>}
+            <span className="text-zinc-600 text-xs ml-auto">{configText.length} chars</span>
+          </div>
         </div>
 
-        {/* Optional workspace files */}
+        {/* SOUL.md */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            SOUL.md <span className="text-zinc-500">(optional)</span>
+            SOUL.md{" "}
+            <span className="text-xs text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">optional</span>
           </label>
           <textarea
             value={soulMd}
             onChange={(e) => setSoulMd(e.target.value)}
             rows={4}
             placeholder="Your agent's personality and instructions..."
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-[#E8404A]/50 font-mono text-sm resize-none"
+            className={`${inputOk} font-mono text-sm resize-none`}
           />
+          {soulMd.length > 0 && (
+            <p className="text-zinc-600 text-xs mt-1 text-right">{soulMd.length} chars</p>
+          )}
         </div>
 
+        {/* AGENTS.md */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-            AGENTS.md <span className="text-zinc-500">(optional)</span>
+            AGENTS.md{" "}
+            <span className="text-xs text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded">optional</span>
           </label>
           <textarea
             value={agentsMd}
             onChange={(e) => setAgentsMd(e.target.value)}
             rows={4}
             placeholder="Agent routing and orchestration docs..."
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-[#E8404A]/50 font-mono text-sm resize-none"
+            className={`${inputOk} font-mono text-sm resize-none`}
           />
+          {agentsMd.length > 0 && (
+            <p className="text-zinc-600 text-xs mt-1 text-right">{agentsMd.length} chars</p>
+          )}
         </div>
 
         <button
           type="submit"
-          className="w-full bg-[#E8404A] hover:bg-[#d63840] text-white py-3 rounded-lg transition-colors font-medium text-lg"
+          disabled={submitting}
+          className="w-full bg-[#E8404A] hover:bg-[#d63840] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-lg transition-colors font-medium text-lg"
         >
-          Submit Setup
+          {submitting ? "Submitting..." : "Submit Setup"}
         </button>
       </form>
     </div>
