@@ -125,8 +125,8 @@ export async function POST(req: NextRequest) {
     const cleanDescription = stripHtml(description).trim();
 
     // GitHub PR creation
-    const token = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPO || "0xShin0221/claw-setups";
+    const token = (process.env.GITHUB_TOKEN || "").trim();
+    const repo = (process.env.GITHUB_REPO || "0xShin0221/claw-setups").trim();
 
     if (!token) {
       return NextResponse.json(
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const [owner, repoName] = repo.split("/");
+    const [owner, repoName] = repo.split("/").map(s => s.trim());
     const octokit = new Octokit({ auth: token });
     const slug = slugify(cleanTitle);
     const branchName = `community/${slug}`;
