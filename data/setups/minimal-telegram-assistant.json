@@ -1,0 +1,33 @@
+{
+  "id": "minimal-telegram-assistant",
+  "title": "Minimal Telegram Personal Assistant",
+  "author": { "name": "johndoe", "github": "johndoe" },
+  "description": "The simplest possible OpenClaw setup — single Claude agent on Telegram. Perfect for getting started with basic personal assistant functionality.",
+  "useCase": "personal-assistant",
+  "channels": ["telegram"],
+  "model": "anthropic/claude-haiku-4",
+  "skills": ["apple-reminders", "web_search", "weather"],
+  "likes": 127,
+  "createdAt": "2026-02-14",
+  "config": {
+    "version": "1.0",
+    "name": "Personal Assistant",
+    "channels": [
+      {
+        "type": "telegram",
+        "token": "***REDACTED***"
+      }
+    ],
+    "agents": [
+      {
+        "name": "main",
+        "model": "anthropic/claude-haiku-4",
+        "skills": ["apple-reminders", "web_search", "weather"],
+        "system_prompt": "You are a helpful personal assistant. Keep responses concise and actionable."
+      }
+    ]
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# Personal Assistant\n\nYou are a friendly, concise personal assistant. You help with daily tasks like reminders, quick web lookups, and weather checks. Keep responses under 200 words unless asked for detail."
+  }
+}

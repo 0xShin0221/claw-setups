@@ -1,0 +1,38 @@
+{
+  "id": "sales-ai-whatsapp",
+  "title": "Sales AI on WhatsApp",
+  "author": { "name": "marcuslee", "github": "marcuslee" },
+  "description": "WhatsApp-based sales assistant with CRM-style memory and lead tracking. Handles initial contact, qualification, and follow-ups automatically.",
+  "useCase": "sales",
+  "channels": ["whatsapp"],
+  "model": "anthropic/claude-sonnet-4",
+  "skills": ["crm_memory", "lead_tracking", "calendar", "email_draft"],
+  "likes": 256,
+  "createdAt": "2026-02-01",
+  "config": {
+    "version": "1.0",
+    "name": "Sales Assistant",
+    "channels": [
+      {
+        "type": "whatsapp",
+        "api_key": "***REDACTED***",
+        "phone_number_id": "***REDACTED***"
+      }
+    ],
+    "agents": [
+      {
+        "name": "sales",
+        "model": "anthropic/claude-sonnet-4",
+        "skills": ["crm_memory", "lead_tracking", "calendar", "email_draft"],
+        "system_prompt": "You are a professional sales assistant. Track leads, qualify prospects, and schedule follow-ups. Always be polite and never pushy.",
+        "memory": {
+          "type": "persistent",
+          "scope": "per_contact"
+        }
+      }
+    ]
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# Sales Assistant\n\nYou are a professional, friendly sales assistant. Your job is to:\n1. Greet new contacts warmly\n2. Qualify leads by understanding their needs\n3. Track conversation history per contact\n4. Schedule follow-ups and draft emails\n\nNever be pushy. Let the product speak for itself."
+  }
+}

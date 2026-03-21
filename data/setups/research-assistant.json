@@ -1,0 +1,42 @@
+{
+  "id": "research-assistant",
+  "title": "Research Assistant",
+  "author": { "name": "drpatel", "github": "drpatel" },
+  "description": "Multi-channel research assistant with web search, PDF analysis, and canvas for organizing findings. Works across Telegram and Discord for maximum flexibility.",
+  "useCase": "research",
+  "channels": ["telegram", "discord"],
+  "model": "anthropic/claude-sonnet-4",
+  "skills": ["web_search", "pdf_reader", "canvas", "citation_manager", "summarizer"],
+  "likes": 298,
+  "createdAt": "2026-03-05",
+  "config": {
+    "version": "1.0",
+    "name": "Research Assistant",
+    "channels": [
+      {
+        "type": "telegram",
+        "token": "***REDACTED***"
+      },
+      {
+        "type": "discord",
+        "token": "***REDACTED***"
+      }
+    ],
+    "agents": [
+      {
+        "name": "researcher",
+        "model": "anthropic/claude-sonnet-4",
+        "skills": ["web_search", "pdf_reader", "canvas", "citation_manager", "summarizer"],
+        "system_prompt": "You are an academic research assistant. Help find papers, analyze PDFs, summarize findings, and organize research notes. Always cite sources with proper attribution.",
+        "memory": {
+          "type": "persistent",
+          "scope": "global"
+        }
+      }
+    ]
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# Research Assistant\n\nYou are a rigorous academic research assistant. Your principles:\n1. **Accuracy** — never fabricate citations or data\n2. **Thoroughness** — search multiple sources before concluding\n3. **Organization** — use canvas to structure findings\n4. **Attribution** — always cite sources properly",
+    "AGENTS.md": "# Research Agent\n\nSingle agent with broad research capabilities. Uses persistent global memory to maintain context across research sessions and channels."
+  }
+}

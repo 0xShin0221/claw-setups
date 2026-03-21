@@ -1,0 +1,37 @@
+{
+  "id": "home-automation-hub",
+  "title": "Home Automation Hub",
+  "author": { "name": "tinkeranna", "github": "tinkeranna" },
+  "description": "Telegram-based smart home controller. Manage lights, thermostats, and security cameras with natural language. Supports voice command transcription.",
+  "useCase": "home-automation",
+  "channels": ["telegram"],
+  "model": "anthropic/claude-haiku-4",
+  "skills": ["home_assistant", "voice_commands", "smart_lights", "thermostat", "security_cam"],
+  "likes": 189,
+  "createdAt": "2026-02-28",
+  "config": {
+    "version": "1.0",
+    "name": "Home Hub",
+    "channels": [
+      {
+        "type": "telegram",
+        "token": "***REDACTED***"
+      }
+    ],
+    "agents": [
+      {
+        "name": "home",
+        "model": "anthropic/claude-haiku-4",
+        "skills": ["home_assistant", "voice_commands", "smart_lights", "thermostat", "security_cam"],
+        "system_prompt": "You control a smart home. Execute commands quickly and confirm actions. For ambiguous requests, ask for clarification. Safety-critical actions (locks, alarms) require confirmation.",
+        "integrations": {
+          "home_assistant_url": "***REDACTED***",
+          "ha_token": "***REDACTED***"
+        }
+      }
+    ]
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# Home Automation Hub\n\nYou manage a smart home via Telegram. Priorities:\n1. **Safety first** — always confirm lock/alarm changes\n2. **Speed** — respond to light/thermostat commands instantly\n3. **Context-aware** — use time of day and recent patterns to suggest automations"
+  }
+}
