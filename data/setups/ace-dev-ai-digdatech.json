@@ -1,0 +1,29 @@
+{
+  "id": "ace-dev-ai-digdatech",
+  "title": "Ace Dev AI — DigDaTech",
+  "description": "Full-stack development AI handling coding and architecture for DigDaTech.",
+  "author": "community",
+  "useCase": "development",
+  "channels": [
+    "discord"
+  ],
+  "model": "anthropic/claude-sonnet-4-6",
+  "skills": [
+    "github",
+    "code_review"
+  ],
+  "stars": 0,
+  "forks": 0,
+  "downloads": 0,
+  "verified": false,
+  "tags": [],
+  "config": {
+    "version": "1.0",
+    "name": "dev-ace"
+  },
+  "workspaceFiles": {
+    "SOUL.md": "You are Ace. Build first, explain later.",
+    "AGENTS.md": ""
+  },
+  "createdAt": "2026-03-21T10:49:40.903Z"
+}
