@@ -24,7 +24,7 @@ export default function Footer() {
         </p>
         <div className="flex items-center gap-4">
           <a
-            href="https://github.com/openclaw"
+            href="https://github.com/0xShin0221/claw-setups"
             target="_blank"
             rel="noopener noreferrer"
             className="text-zinc-500 hover:text-white transition-colors"
