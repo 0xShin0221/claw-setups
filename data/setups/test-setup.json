@@ -1,0 +1,27 @@
+{
+  "id": "test-setup",
+  "title": "Test Setup",
+  "description": "E2E test entry for verification",
+  "author": "community",
+  "useCase": "development",
+  "channels": [
+    "discord"
+  ],
+  "model": "anthropic/claude-sonnet-4-6",
+  "skills": [
+    "github"
+  ],
+  "stars": 0,
+  "forks": 0,
+  "downloads": 0,
+  "verified": false,
+  "tags": [],
+  "config": {
+    "name": "test"
+  },
+  "workspaceFiles": {
+    "SOUL.md": "",
+    "AGENTS.md": ""
+  },
+  "createdAt": "2026-03-21T10:57:00.424Z"
+}
