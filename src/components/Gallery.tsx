@@ -39,7 +39,7 @@ export default function Gallery({ setups }: { setups: Setup[] }) {
     }
 
     if (sort === "likes") {
-      result.sort((a, b) => b.likes - a.likes);
+      result.sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0));
     } else if (sort === "newest") {
       result.sort(
         (a, b) =>
@@ -53,7 +53,7 @@ export default function Gallery({ setups }: { setups: Setup[] }) {
           (now - new Date(a.createdAt).getTime()) / (1000 * 60 * 60 * 24);
         const ageB =
           (now - new Date(b.createdAt).getTime()) / (1000 * 60 * 60 * 24);
-        return b.likes / (ageB + 1) - a.likes / (ageA + 1);
+        return (b.likes ?? 0) / (ageB + 1) - (a.likes ?? 0) / (ageA + 1);
       });
     }
 
