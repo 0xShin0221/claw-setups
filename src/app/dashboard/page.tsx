@@ -35,6 +35,12 @@ export default function DashboardPage() {
   const [xHandleInput, setXHandleInput] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState<string | null>(null);
+  // Submit form
+  const [submitTitle, setSubmitTitle] = useState("");
+  const [submitDesc, setSubmitDesc] = useState("");
+  const [submitModel, setSubmitModel] = useState("anthropic/claude-sonnet-4-6");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ok: boolean; message: string; url?: string} | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -148,6 +154,31 @@ export default function DashboardPage() {
       setVerifyError("Failed to generate code. Try again.");
     }
     setLinking(false);
+  }
+
+  async function submitSetup() {
+    if (!submitTitle.trim() || !submitDesc.trim()) return;
+    setSubmitting(true);
+    setSubmitResult(null);
+    const res = await fetch("/api/dashboard/submit-setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: submitTitle.trim(),
+        description: submitDesc.trim(),
+        model: submitModel,
+      }),
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      setSubmitResult({ ok: true, message: "Submitted! Your setup will appear in the gallery in ~60 seconds.", url: data.prUrl });
+      setSubmitTitle("");
+      setSubmitDesc("");
+      await fetchKeyInfo();
+    } else {
+      setSubmitResult({ ok: false, message: data.error || "Submission failed." });
+    }
+    setSubmitting(false);
   }
 
   async function completeXVerify() {
@@ -425,16 +456,67 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Quick start */}
-      <div className="rounded-lg border border-zinc-800 p-6 space-y-3">
-        <h2 className="font-semibold text-lg">Quick Start</h2>
-        <p className="text-sm text-zinc-400">Once you have a key, your agent can submit setups:</p>
-        <pre className="bg-zinc-900 rounded p-3 text-xs font-mono text-zinc-300 overflow-x-auto">{`curl -X POST https://claw-setups.vercel.app/api/agent-submit \\
-  -H "Authorization: Bearer YOUR_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d title:My Agent`}</pre>
-        <a href="/for-agents" className="text-sm text-[#E8404A] hover:underline">Full API docs &#x2192;</a>
-      </div>
+      {/* Submit a setup */}
+      {keyInfo?.hasKey && (
+        <div className="rounded-lg border border-zinc-800 p-6 space-y-4">
+          <h2 className="font-semibold text-lg">Publish a Setup</h2>
+          <p className="text-sm text-zinc-400">Share your OpenClaw config with the community.</p>
+
+          {submitResult ? (
+            <div className={`rounded-lg p-4 space-y-2 ${submitResult.ok ? "bg-green-950/50 border border-green-800" : "bg-red-950/50 border border-red-900"}`}>
+              <p className={`text-sm font-medium ${submitResult.ok ? "text-green-400" : "text-red-400"}`}>
+                {submitResult.ok ? "✅" : "❌"} {submitResult.message}
+              </p>
+              {submitResult.url && (
+                <a href={submitResult.url} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-400 hover:text-white underline">
+                  View PR →
+                </a>
+              )}
+              <button onClick={() => setSubmitResult(null)} className="text-xs text-zinc-600 hover:text-zinc-400 block">
+                Submit another
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Setup title (e.g. My Discord Dev Bot)"
+                value={submitTitle}
+                onChange={(e) => setSubmitTitle(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#E8404A]/50"
+              />
+              <textarea
+                placeholder="Describe what this setup does..."
+                value={submitDesc}
+                onChange={(e) => setSubmitDesc(e.target.value)}
+                rows={3}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#E8404A]/50 resize-none"
+              />
+              <select
+                value={submitModel}
+                onChange={(e) => setSubmitModel(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50"
+              >
+                <option value="anthropic/claude-sonnet-4-6">claude-sonnet-4-6</option>
+                <option value="anthropic/claude-opus-4-5">claude-opus-4-5</option>
+                <option value="anthropic/claude-haiku-3-5">claude-haiku-3-5</option>
+                <option value="openai/gpt-4o">gpt-4o</option>
+                <option value="openai/gpt-4o-mini">gpt-4o-mini</option>
+              </select>
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={submitSetup}
+                  disabled={submitting || !submitTitle.trim() || !submitDesc.trim()}
+                  className="px-5 py-2.5 text-sm bg-[#E8404A] hover:bg-[#d63840] text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                >
+                  {submitting ? "Publishing..." : "Publish to Gallery"}
+                </button>
+                <a href="/for-agents" className="text-xs text-zinc-600 hover:text-zinc-400">API docs →</a>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
