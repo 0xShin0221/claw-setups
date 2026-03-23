@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Octokit } from "@octokit/rest";
 import { slugify } from "@/lib/slugify";
 import { scanAndRedact } from "@/lib/secretScan";
-import { validateApiKey, extractApiKey } from "@/lib/apiKeys";
+import { validateApiKeyAsync, extractApiKey } from "@/lib/apiKeys";
+import { recordKeyUsage } from "@/lib/keyStore";
 
 // --- Per-key rate limiting (in-memory, resets on deploy) ---
 const keyRateLimitMap = new Map<string, number[]>();
@@ -48,7 +49,8 @@ export async function POST(req: NextRequest) {
   try {
     // API key auth
     const authHeader = req.headers.get("authorization");
-    if (!validateApiKey(authHeader)) {
+    const authResult = await validateApiKeyAsync(authHeader);
+    if (!authResult.valid) {
       return NextResponse.json(
         { error: "Invalid or missing API key. Use Authorization: Bearer <key>" },
         { status: 401 }
@@ -189,6 +191,7 @@ export async function POST(req: NextRequest) {
           soulMdClean,
           agentsMdClean,
           apiKey,
+          githubId: authResult.githubId,
         });
       }
       throw e;
@@ -206,6 +209,7 @@ export async function POST(req: NextRequest) {
       soulMdClean,
       agentsMdClean,
       apiKey,
+      githubId: authResult.githubId,
     });
   } catch (error: unknown) {
     console.error("Agent submit error:", error);
@@ -226,6 +230,7 @@ interface PRParams {
   soulMdClean: string;
   agentsMdClean: string;
   apiKey: string;
+  githubId?: string;
 }
 
 async function createPRWithBranch(
@@ -237,7 +242,7 @@ async function createPRWithBranch(
 ) {
   const {
     slug, cleanTitle, cleanDescription, useCase, channels,
-    model, skills, parsedConfig, soulMdClean, agentsMdClean, apiKey,
+    model, skills, parsedConfig, soulMdClean, agentsMdClean, apiKey, githubId,
   } = params;
 
   const setupData = {
@@ -306,6 +311,15 @@ async function createPRWithBranch(
   });
 
   recordKeyRequest(apiKey);
+
+  // Record usage for self-service keys
+  if (githubId) {
+    try {
+      await recordKeyUsage(githubId);
+    } catch {
+      // KV may not be configured
+    }
+  }
 
   return NextResponse.json({
     ok: true,

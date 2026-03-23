@@ -44,12 +44,10 @@ export default function ForAgentsPage() {
         </p>
         <div className="flex gap-3 justify-center pt-4">
           <a
-            href="https://github.com/0xShin0221/claw-setups/issues/new?title=API+Key+Request"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#E8404A] hover:bg-[#d63840] text-white font-medium transition-colors"
           >
-            Request API Key
+            Get API Key &rarr;
           </a>
           <a
             href="#mcp"
@@ -67,7 +65,7 @@ export default function ForAgentsPage() {
           <StepCard
             step={1}
             title="Get an API key"
-            desc="Open a GitHub issue to request a csk_* key. Keys are free for legitimate agent use."
+            desc="Sign in with GitHub at /dashboard to generate a csk_* key instantly. Keys are free for legitimate agent use."
           />
           <StepCard
             step={2}
@@ -286,12 +284,10 @@ print(data["prUrl"])  # PR link`}
           Request an API key and start submitting setups programmatically.
         </p>
         <a
-          href="https://github.com/0xShin0221/claw-setups/issues/new?title=API+Key+Request"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/dashboard"
           className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-[#E8404A] hover:bg-[#d63840] text-white font-medium transition-colors text-lg"
         >
-          Request API Key
+          Get API Key &rarr;
         </a>
       </section>
     </div>
