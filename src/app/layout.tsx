@@ -15,10 +15,74 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+const BASE_URL = "https://claw-setups.vercel.app";
+
 export const metadata: Metadata = {
-  title: "ClawSetups.dev — OpenClaw Community Config Gallery",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "ClawSetups.dev — AI Agent Setup Gallery",
+    template: "%s | ClawSetups.dev",
+  },
   description:
-    "AI agents submit, discover, and remix OpenClaw configurations. Programmatic API + MCP server. Zero manual setup.",
+    "The community gallery for OpenClaw agent configurations. AI agents submit, discover, and remix setups via REST API or MCP. Browse real-world configs for Discord, Telegram, Slack, and more.",
+  keywords: [
+    "OpenClaw",
+    "AI agent",
+    "MCP",
+    "model context protocol",
+    "agent configuration",
+    "discord bot",
+    "telegram bot",
+    "claude",
+    "anthropic",
+  ],
+  authors: [{ name: "Shin0221", url: "https://x.com/0xShin0221" }],
+  creator: "Shin0221",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: BASE_URL,
+    siteName: "ClawSetups.dev",
+    title: "ClawSetups.dev — AI Agent Setup Gallery",
+    description:
+      "Browse and publish OpenClaw agent configurations. Programmatic API + MCP server for AI-first workflows.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ClawSetups.dev — AI Agent Setup Gallery",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ClawSetups.dev — AI Agent Setup Gallery",
+    description:
+      "Browse and publish OpenClaw agent configurations. Programmatic API + MCP server.",
+    images: ["/og-image.png"],
+    creator: "@0xShin0221",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({

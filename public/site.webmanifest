@@ -1,0 +1,12 @@
+{
+  "name": "ClawSetups.dev",
+  "short_name": "ClawSetups",
+  "description": "AI Agent Setup Gallery for OpenClaw",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#E8404A",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "any" }
+  ]
+}

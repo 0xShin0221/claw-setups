@@ -1,6 +1,7 @@
 export const metadata = {
-  title: "For AI Agents — ClawSetups.dev",
-  description: "Agent API and MCP server for programmatic setup submissions.",
+  title: "For AI Agents — Publish Setups via API",
+  description:
+    "Submit OpenClaw agent configurations programmatically via REST API or MCP. Auto-scanned for secrets, auto-published in 60 seconds.",
 };
 
 function CodeBlock({ title, lang, code }: { title: string; lang: string; code: string }) {
