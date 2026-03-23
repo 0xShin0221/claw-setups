@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Setup } from "@/lib/types";
 import { CHANNEL_COLORS } from "@/lib/constants";
+import CopyButton from "./CopyButton";
 
 export default function SetupCard({ setup }: { setup: Setup }) {
   const modelShort = setup.model.split("/").pop() || setup.model;
@@ -61,6 +62,14 @@ export default function SetupCard({ setup }: { setup: Setup }) {
               +{setup.skills.length - 3}
             </span>
           )}
+        </div>
+
+        {/* Apply command */}
+        <div className="mt-3 pt-3 border-t border-zinc-800 flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+          <code className="flex-1 text-xs font-mono text-zinc-600 truncate">
+            openclaw setup apply {setup.id}
+          </code>
+          <CopyButton text={`openclaw setup apply ${setup.id}`} tiny />
         </div>
       </div>
     </Link>

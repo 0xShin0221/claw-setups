@@ -4,6 +4,15 @@ import { getAllSlugs, getSetupBySlug } from "@/lib/setups";
 import { CHANNEL_COLORS } from "@/lib/constants";
 import CopyButton from "@/components/CopyButton";
 
+export function generateMetadata({ params }: { params: { slug: string } }) {
+  const setup = getSetupBySlug(params.slug);
+  if (!setup) return {};
+  return {
+    title: `${setup.title} | ClawSetups.dev`,
+    description: setup.description,
+  };
+}
+
 export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
 }
@@ -112,13 +121,48 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex gap-3">
+        {/* Apply this setup */}
+        <div className="rounded-xl border border-[#E8404A]/30 bg-[#E8404A]/5 p-6 space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Apply this setup</h2>
+            <p className="text-sm text-zinc-400 mt-1">
+              Use this configuration in your OpenClaw workspace in one command.
+            </p>
+          </div>
+
+          {/* CLI command */}
+          <div className="space-y-2">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">OpenClaw CLI</p>
+            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-4 py-3">
+              <code className="flex-1 text-sm font-mono text-[#E8404A]">
+                openclaw setup apply {setup.id}
+              </code>
+              <CopyButton text={`openclaw setup apply ${setup.id}`} />
+            </div>
+            <p className="text-xs text-zinc-600">
+              Downloads SOUL.md, AGENTS.md and config to your current workspace.
+            </p>
+          </div>
+
+          {/* Or tell your agent */}
+          <div className="space-y-2">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Or tell your agent</p>
+            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-4 py-3">
+              <code className="flex-1 text-sm font-mono text-zinc-300 break-all">
+                Apply the &ldquo;{setup.title}&rdquo; setup from claw-setups.vercel.app/{setup.id}
+              </code>
+              <CopyButton text={`Apply the "${setup.title}" setup from claw-setups.vercel.app/${setup.id}`} />
+            </div>
+          </div>
+        </div>
+
+        {/* Fork */}
+        <div className="flex gap-3 mt-4">
           <Link
-            href={`/submit?fork=${setup.id}`}
+            href="/dashboard"
             className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
           >
-            Fork this setup
+            Publish your own setup →
           </Link>
         </div>
       </div>
