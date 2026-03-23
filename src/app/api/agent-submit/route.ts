@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 import { slugify } from "@/lib/slugify";
 import { scanAndRedact } from "@/lib/secretScan";
 import { validateApiKeyAsync, extractApiKey } from "@/lib/apiKeys";
-import { recordKeyUsage } from "@/lib/keyStore";
+import { recordKeyUsage, getUserKey } from "@/lib/keyStore";
 
 // --- Per-key rate limiting (in-memory, resets on deploy) ---
 const keyRateLimitMap = new Map<string, number[]>();
@@ -161,6 +161,15 @@ export async function POST(req: NextRequest) {
     });
     const baseSha = refData.object.sha;
 
+    // Get github username for author field
+    let githubUsername: string | undefined;
+    if (authResult.userId) {
+      try {
+        const keyRecord = await getUserKey(authResult.userId);
+        githubUsername = keyRecord?.githubUsername;
+      } catch { /* ignore */ }
+    }
+
     // Create branch
     try {
       await octokit.git.createRef({
@@ -192,6 +201,7 @@ export async function POST(req: NextRequest) {
           agentsMdClean,
           apiKey,
           userId: authResult.userId,
+          githubUsername,
         });
       }
       throw e;
@@ -207,6 +217,7 @@ export async function POST(req: NextRequest) {
       skills: skills || [],
       parsedConfig,
       soulMdClean,
+      githubUsername,
       agentsMdClean,
       apiKey,
       userId: authResult.userId,
@@ -231,6 +242,7 @@ interface PRParams {
   agentsMdClean: string;
   apiKey: string;
   userId?: string;
+  githubUsername?: string;
 }
 
 async function createPRWithBranch(
@@ -242,29 +254,29 @@ async function createPRWithBranch(
 ) {
   const {
     slug, cleanTitle, cleanDescription, useCase, channels,
-    model, skills, parsedConfig, soulMdClean, agentsMdClean, apiKey, userId,
+    model, skills, parsedConfig, soulMdClean, agentsMdClean, apiKey, userId, githubUsername,
   } = params;
 
+  const authorName = githubUsername || "community";
   const setupData = {
     id: slug,
     title: cleanTitle,
     description: cleanDescription,
-    author: "community",
+    author: {
+      name: authorName,
+      github: authorName,
+    },
     useCase,
     channels,
     model,
     skills,
-    stars: 0,
-    forks: 0,
-    downloads: 0,
-    verified: false,
-    tags: [],
+    likes: 0,
     config: parsedConfig,
     workspaceFiles: {
       "SOUL.md": soulMdClean,
       "AGENTS.md": agentsMdClean,
     },
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString().split("T")[0],
   };
 
   // Create file in branch
