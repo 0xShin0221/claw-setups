@@ -122,37 +122,63 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
         )}
 
         {/* Apply this setup */}
-        <div className="rounded-xl border border-[#E8404A]/30 bg-[#E8404A]/5 p-6 space-y-4">
+        <div className="rounded-xl border border-[#E8404A]/30 bg-[#E8404A]/5 p-6 space-y-5">
           <div>
             <h2 className="text-lg font-semibold text-white">Apply this setup</h2>
             <p className="text-sm text-zinc-400 mt-1">
-              Use this configuration in your OpenClaw workspace in one command.
+              Copy workspace files directly into your OpenClaw workspace.
             </p>
           </div>
 
-          {/* CLI command */}
-          <div className="space-y-2">
-            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">OpenClaw CLI</p>
-            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-4 py-3">
-              <code className="flex-1 text-sm font-mono text-[#E8404A]">
-                openclaw setup apply {setup.id}
-              </code>
-              <CopyButton text={`openclaw setup apply ${setup.id}`} />
+          {/* Workspace files download */}
+          {setup.workspaceFiles && Object.keys(setup.workspaceFiles).filter(k => setup.workspaceFiles![k]).length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Workspace files</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {Object.entries(setup.workspaceFiles).filter(([, v]) => v).map(([name, content]) => (
+                  <div key={name} className="flex items-center justify-between gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <svg className="w-4 h-4 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-sm font-mono text-zinc-300 truncate">{name}</span>
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <CopyButton text={content} tiny />
+                      <a
+                        href={`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`}
+                        download={name}
+                        className="p-1 text-zinc-600 hover:text-zinc-300 transition-colors"
+                        title={`Download ${name}`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-xs text-zinc-600">
-              Downloads SOUL.md, AGENTS.md and config to your current workspace.
-            </p>
+          )}
+
+          {/* Tell your agent */}
+          <div className="space-y-2">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Tell your agent</p>
+            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-3 py-2.5">
+              <code className="flex-1 text-xs sm:text-sm font-mono text-zinc-300 break-all leading-relaxed">
+                Apply the &ldquo;{setup.title}&rdquo; setup from claw-setups.vercel.app/setups/{setup.id}
+              </code>
+              <CopyButton text={`Apply the "${setup.title}" setup from claw-setups.vercel.app/setups/${setup.id}`} tiny />
+            </div>
           </div>
 
-          {/* Or tell your agent */}
-          <div className="space-y-2">
-            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Or tell your agent</p>
-            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-4 py-3">
-              <code className="flex-1 text-sm font-mono text-zinc-300 break-all">
-                Apply the &ldquo;{setup.title}&rdquo; setup from claw-setups.vercel.app/{setup.id}
-              </code>
-              <CopyButton text={`Apply the "${setup.title}" setup from claw-setups.vercel.app/${setup.id}`} />
-            </div>
+          {/* Future CLI */}
+          <div className="flex items-center gap-2 text-xs text-zinc-600">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>CLI coming: <code className="text-zinc-500">openclaw setup apply {setup.id}</code></span>
           </div>
         </div>
 
