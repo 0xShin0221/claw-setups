@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { createServerSupabaseClient } from "@/lib/supabase";
 import { revokeKey } from "@/lib/keyStore";
 
 export async function POST() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  await revokeKey(session.user.id);
+
+  await revokeKey(user.id);
   return NextResponse.json({ ok: true });
 }

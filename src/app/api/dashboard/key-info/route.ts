@@ -1,28 +1,23 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { createServerSupabaseClient } from "@/lib/supabase";
 import { getUserKey } from "@/lib/keyStore";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    const record = await getUserKey(session.user.id);
-    if (!record || record.revoked) {
-      return NextResponse.json({ key: null });
-    }
-    return NextResponse.json({
-      key: {
-        prefix: record.keyPrefix,
-        createdAt: record.createdAt,
-        lastUsedAt: record.lastUsedAt,
-        submissionCount: record.submissionCount,
-        revoked: record.revoked,
-      },
-    });
-  } catch {
-    return NextResponse.json({ key: null });
-  }
+  const keyRecord = await getUserKey(user.id);
+  return NextResponse.json({
+    hasKey: !!keyRecord,
+    keyRecord: keyRecord || null,
+    user: {
+      name: user.user_metadata?.full_name || user.user_metadata?.user_name,
+      username: user.user_metadata?.user_name,
+      avatar: user.user_metadata?.avatar_url,
+    },
+  });
 }

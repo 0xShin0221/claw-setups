@@ -14,7 +14,7 @@ function getEnvKeys(): string[] {
 
 export async function validateApiKeyAsync(
   authHeader: string | null
-): Promise<{ valid: boolean; githubId?: string; isEnvKey?: boolean }> {
+): Promise<{ valid: boolean; userId?: string; isEnvKey?: boolean }> {
   if (!authHeader?.startsWith("Bearer ")) return { valid: false };
   const key = authHeader.slice(7).trim();
   if (!key) return { valid: false };
@@ -22,12 +22,12 @@ export async function validateApiKeyAsync(
   // Check env keys first (internal agents)
   if (getEnvKeys().includes(key)) return { valid: true, isEnvKey: true };
 
-  // Check KV store (self-service keys)
+  // Check Supabase store (self-service keys)
   try {
-    const githubId = await validateKeyFromStore(key);
-    if (githubId) return { valid: true, githubId };
+    const userId = await validateKeyFromStore(key);
+    if (userId) return { valid: true, userId };
   } catch {
-    // KV not configured — fall through
+    // Supabase not configured — fall through
   }
 
   return { valid: false };

@@ -1,192 +1,164 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-
-interface SessionUser {
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-  id?: string;
-}
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase-client";
 
 interface KeyInfo {
-  prefix: string;
-  createdAt: string;
-  lastUsedAt: string | null;
-  submissionCount: number;
-  revoked: boolean;
+  hasKey: boolean;
+  keyRecord: {
+    keyPrefix: string;
+    createdAt: string;
+    lastUsedAt: string | null;
+    submissionCount: number;
+  } | null;
+  user: {
+    name: string;
+    username: string;
+    avatar: string;
+  };
 }
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<null | { user: { email?: string } }>(null);
   const [keyInfo, setKeyInfo] = useState<KeyInfo | null>(null);
+  const [loading, setLoading] = useState(true);
   const [newKey, setNewKey] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch session
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
-      .then((data) => {
-        setUser(data?.user || null);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  // Fetch key info
-  const fetchKeyInfo = useCallback(async () => {
-    try {
-      const res = await fetch("/api/dashboard/key-info");
-      if (res.ok) {
-        const data = await res.json();
-        setKeyInfo(data.key || null);
-      }
-    } catch {
-      // KV may not be configured
-    }
-  }, []);
+  const [revoking, setRevoking] = useState(false);
 
   useEffect(() => {
-    if (user) fetchKeyInfo();
-  }, [user, fetchKeyInfo]);
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) fetchKeyInfo();
+      else setLoading(false);
+    });
+  }, []);
 
-  const generateKey = async () => {
-    if (
-      keyInfo &&
-      !keyInfo.revoked &&
-      !confirm(
-        "This will revoke your existing key immediately. Continue?"
-      )
-    ) {
-      return;
-    }
-    setActionLoading(true);
-    setError(null);
-    setNewKey(null);
-    try {
-      const res = await fetch("/api/dashboard/generate-key", {
-        method: "POST",
-      });
+  async function fetchKeyInfo() {
+    setLoading(true);
+    const res = await fetch("/api/dashboard/key-info");
+    if (res.ok) {
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Failed to generate key");
-        return;
-      }
+      setKeyInfo(data);
+    }
+    setLoading(false);
+  }
+
+  async function signInWithGitHub() {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+    });
+  }
+
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setSession(null);
+    setKeyInfo(null);
+    setNewKey(null);
+  }
+
+  async function generateKey() {
+    if (!confirm("This will revoke your existing key. Continue?")) return;
+    setGenerating(true);
+    setNewKey(null);
+    const res = await fetch("/api/dashboard/generate-key", { method: "POST" });
+    const data = await res.json();
+    if (data.ok) {
       setNewKey(data.key);
-      setKeyInfo({
-        prefix: data.prefix,
-        createdAt: data.createdAt,
-        lastUsedAt: null,
-        submissionCount: 0,
-        revoked: false,
-      });
-    } catch {
-      setError("Failed to generate key. Is Vercel KV configured?");
-    } finally {
-      setActionLoading(false);
+      await fetchKeyInfo();
     }
-  };
+    setGenerating(false);
+  }
 
-  const revokeKey = async () => {
+  async function revokeKey() {
     if (!confirm("Revoke your API key? This cannot be undone.")) return;
-    setActionLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/dashboard/revoke-key", {
-        method: "POST",
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Failed to revoke key");
-        return;
-      }
-      setKeyInfo(null);
-      setNewKey(null);
-    } catch {
-      setError("Failed to revoke key.");
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    setRevoking(true);
+    await fetch("/api/dashboard/revoke-key", { method: "POST" });
+    setNewKey(null);
+    await fetchKeyInfo();
+    setRevoking(false);
+  }
 
-  const copyKey = async () => {
+  async function copyKey() {
     if (!newKey) return;
     await navigator.clipboard.writeText(newKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
+  }
 
+  // Loading state
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <div className="text-zinc-400">Loading...</div>
+      <div className="max-w-2xl mx-auto px-4 py-24 text-center">
+        <div className="w-8 h-8 border-2 border-zinc-700 border-t-[#E8404A] rounded-full animate-spin mx-auto" />
       </div>
     );
   }
 
-  if (!user) {
+  // Not signed in
+  if (!session) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-6">
-        <h1 className="text-3xl font-bold">API Key Dashboard</h1>
-        <p className="text-zinc-400">
-          Sign in with GitHub to generate and manage your API key.
+      <div className="max-w-2xl mx-auto px-4 py-24 text-center space-y-6">
+        <div className="text-4xl">&#x1F511;</div>
+        <h1 className="text-3xl font-bold">Get your API Key</h1>
+        <p className="text-zinc-400 max-w-md mx-auto">
+          Sign in with GitHub to generate an API key. Your agent can then submit setups to
+          the community gallery automatically.
         </p>
-        <a
-          href="/api/auth/signin"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#E8404A] hover:bg-[#d63840] text-white font-medium transition-colors"
+        <button
+          onClick={signInWithGitHub}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition-colors"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
           </svg>
           Sign in with GitHub
-        </a>
+        </button>
+        <p className="text-xs text-zinc-600">
+          Free. No credit card required.
+        </p>
       </div>
     );
   }
 
+  // Signed in
   return (
     <div className="max-w-2xl mx-auto px-4 py-16 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">API Key Dashboard</h1>
-          <p className="text-zinc-400 mt-1">
-            Signed in as{" "}
-            <span className="text-white font-medium">{user.name || user.email}</span>
-          </p>
+        <div className="flex items-center gap-3">
+          {keyInfo?.user?.avatar && (
+            <img src={keyInfo.user.avatar} alt="" className="w-10 h-10 rounded-full" />
+          )}
+          <div>
+            <p className="font-semibold">{keyInfo?.user?.name || "Agent Developer"}</p>
+            <p className="text-sm text-zinc-500">@{keyInfo?.user?.username}</p>
+          </div>
         </div>
-        <a
-          href="/api/auth/signout"
-          className="text-sm text-zinc-400 hover:text-white transition-colors"
-        >
+        <button onClick={signOut} className="text-sm text-zinc-500 hover:text-white transition-colors">
           Sign out
-        </a>
+        </button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="rounded-lg border border-red-800 bg-red-950/50 p-4 text-sm text-red-300">
-          {error}
-        </div>
-      )}
-
-      {/* Newly generated key */}
+      {/* New key banner (shown only once) */}
       {newKey && (
-        <div className="rounded-lg border border-yellow-700 bg-yellow-950/30 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-yellow-300 text-sm font-medium">
-            <span>&#9888;</span> This key will not be shown again
+        <div className="rounded-lg border border-green-800 bg-green-950/50 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-green-400 font-medium">
+            <span>&#x2705;</span>
+            <span>Your API key — save this now, it will not be shown again</span>
           </div>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm font-mono text-green-400 break-all">
+            <code className="flex-1 bg-zinc-900 rounded px-3 py-2 text-sm font-mono text-green-300 break-all">
               {newKey}
             </code>
             <button
               onClick={copyKey}
-              className="flex-shrink-0 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium transition-colors"
+              className="px-3 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded transition-colors whitespace-nowrap"
             >
               {copied ? "Copied!" : "Copy"}
             </button>
@@ -194,88 +166,69 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Key status */}
+      {/* Current key status */}
       <div className="rounded-lg border border-zinc-800 p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Your API Key</h2>
-        {keyInfo && !keyInfo.revoked ? (
-          <div className="space-y-3">
+        <h2 className="font-semibold text-lg">API Key</h2>
+        {keyInfo?.hasKey && keyInfo.keyRecord ? (
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-zinc-500">Key prefix</span>
-                <p className="text-white font-mono mt-0.5">{keyInfo.prefix}</p>
+                <p className="text-zinc-500">Key prefix</p>
+                <code className="font-mono text-zinc-300">{keyInfo.keyRecord.keyPrefix}</code>
               </div>
               <div>
-                <span className="text-zinc-500">Created</span>
-                <p className="text-white mt-0.5">
-                  {new Date(keyInfo.createdAt).toLocaleDateString()}
-                </p>
+                <p className="text-zinc-500">Created</p>
+                <p className="text-zinc-300">{new Date(keyInfo.keyRecord.createdAt).toLocaleDateString()}</p>
               </div>
               <div>
-                <span className="text-zinc-500">Last used</span>
-                <p className="text-white mt-0.5">
-                  {keyInfo.lastUsedAt
-                    ? new Date(keyInfo.lastUsedAt).toLocaleDateString()
-                    : "Never"}
-                </p>
+                <p className="text-zinc-500">Last used</p>
+                <p className="text-zinc-300">{keyInfo.keyRecord.lastUsedAt ? new Date(keyInfo.keyRecord.lastUsedAt).toLocaleDateString() : "Never"}</p>
               </div>
               <div>
-                <span className="text-zinc-500">Submissions</span>
-                <p className="text-white mt-0.5">{keyInfo.submissionCount}</p>
+                <p className="text-zinc-500">Submissions</p>
+                <p className="text-zinc-300">{keyInfo.keyRecord.submissionCount}</p>
               </div>
             </div>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={generateKey}
-                disabled={actionLoading}
-                className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                disabled={generating}
+                className="px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50"
               >
-                {actionLoading ? "Working..." : "Rotate Key"}
+                {generating ? "Rotating..." : "Rotate Key"}
               </button>
               <button
                 onClick={revokeKey}
-                disabled={actionLoading}
-                className="px-4 py-2 rounded-lg bg-red-900/50 hover:bg-red-900 border border-red-800 text-red-300 text-sm font-medium transition-colors disabled:opacity-50"
+                disabled={revoking}
+                className="px-4 py-2 text-sm text-red-400 border border-red-900 hover:bg-red-950 rounded-lg transition-colors disabled:opacity-50"
               >
-                Revoke Key
+                {revoking ? "Revoking..." : "Revoke Key"}
               </button>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            <p className="text-zinc-400 text-sm">
-              No active API key. Generate one to start submitting setups
-              programmatically.
-            </p>
+          <div className="space-y-4">
+            <p className="text-zinc-400 text-sm">No API key yet. Generate one to start submitting setups.</p>
             <button
               onClick={generateKey}
-              disabled={actionLoading}
-              className="px-6 py-2.5 rounded-lg bg-[#E8404A] hover:bg-[#d63840] text-white font-medium transition-colors disabled:opacity-50"
+              disabled={generating}
+              className="px-4 py-2 text-sm bg-[#E8404A] hover:bg-[#d63840] text-white rounded-lg transition-colors disabled:opacity-50"
             >
-              {actionLoading ? "Generating..." : "Generate API Key"}
+              {generating ? "Generating..." : "Generate API Key"}
             </button>
           </div>
         )}
       </div>
 
-      {/* Usage instructions */}
+      {/* Quick start */}
       <div className="rounded-lg border border-zinc-800 p-6 space-y-3">
-        <h2 className="text-lg font-semibold">Quick Start</h2>
-        <p className="text-zinc-400 text-sm">
-          Use your key in the <code className="text-zinc-300 bg-zinc-900 px-1.5 py-0.5 rounded text-xs">Authorization</code> header:
-        </p>
-        <pre className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto text-sm font-mono text-zinc-300">
-{`curl -X POST https://claw-setups.vercel.app/api/agent-submit \\
-  -H "Authorization: Bearer csk_your_key_here" \\
+        <h2 className="font-semibold text-lg">Quick Start</h2>
+        <p className="text-sm text-zinc-400">Once you have a key, your agent can submit setups:</p>
+        <pre className="bg-zinc-900 rounded p-3 text-xs font-mono text-zinc-300 overflow-x-auto">{`curl -X POST https://claw-setups.vercel.app/api/agent-submit \\
+  -H "Authorization: Bearer YOUR_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"title":"My Setup", ...}'`}
-        </pre>
-        <p className="text-zinc-500 text-xs">
-          See the{" "}
-          <a href="/for-agents" className="text-[#E8404A] hover:underline">
-            full API docs
-          </a>{" "}
-          for all available fields and options.
-        </p>
+  -d title:My Agent`}</pre>
+        <a href="/for-agents" className="text-sm text-[#E8404A] hover:underline">Full API docs &#x2192;</a>
       </div>
     </div>
   );

@@ -1,25 +1,19 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { generateKey, storeKey, revokeKey } from "@/lib/keyStore";
+import { createServerSupabaseClient } from "@/lib/supabase";
+import { generateKey, storeKey } from "@/lib/keyStore";
 
 export async function POST() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const githubId = session.user.id;
-  const githubUsername =
-    session.user.name || session.user.email || githubId;
-
-  // Revoke existing key first
-  await revokeKey(githubId);
-
-  // Generate new key
+  const githubUsername = user.user_metadata?.user_name || user.email || user.id;
   const newKey = generateKey();
-  const record = await storeKey(githubId, githubUsername, newKey);
+  const record = await storeKey(user.id, githubUsername, newKey);
 
-  // Return the full key ONCE
   return NextResponse.json({
     ok: true,
     key: newKey,

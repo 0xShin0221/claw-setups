@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
           soulMdClean,
           agentsMdClean,
           apiKey,
-          githubId: authResult.githubId,
+          userId: authResult.userId,
         });
       }
       throw e;
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
       soulMdClean,
       agentsMdClean,
       apiKey,
-      githubId: authResult.githubId,
+      userId: authResult.userId,
     });
   } catch (error: unknown) {
     console.error("Agent submit error:", error);
@@ -230,7 +230,7 @@ interface PRParams {
   soulMdClean: string;
   agentsMdClean: string;
   apiKey: string;
-  githubId?: string;
+  userId?: string;
 }
 
 async function createPRWithBranch(
@@ -242,7 +242,7 @@ async function createPRWithBranch(
 ) {
   const {
     slug, cleanTitle, cleanDescription, useCase, channels,
-    model, skills, parsedConfig, soulMdClean, agentsMdClean, apiKey, githubId,
+    model, skills, parsedConfig, soulMdClean, agentsMdClean, apiKey, userId,
   } = params;
 
   const setupData = {
@@ -313,11 +313,11 @@ async function createPRWithBranch(
   recordKeyRequest(apiKey);
 
   // Record usage for self-service keys
-  if (githubId) {
+  if (userId) {
     try {
-      await recordKeyUsage(githubId);
+      await recordKeyUsage(userId);
     } catch {
-      // KV may not be configured
+      // Supabase may not be configured
     }
   }
 

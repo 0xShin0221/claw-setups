@@ -1,5 +1,5 @@
-import { kv } from "@vercel/kv";
 import { createHash, randomBytes } from "crypto";
+import { createServiceClient } from "./supabase";
 
 export function hashKey(key: string): string {
   return createHash("sha256").update(key).digest("hex");
@@ -11,8 +11,7 @@ export function generateKey(): string {
 
 export interface KeyRecord {
   keyHash: string;
-  keyPrefix: string; // first 16 chars for display
-  githubId: string;
+  keyPrefix: string;
   githubUsername: string;
   createdAt: string;
   lastUsedAt: string | null;
@@ -20,66 +19,92 @@ export interface KeyRecord {
   revoked: boolean;
 }
 
-// Store key record for a user
-export async function storeKey(
-  githubId: string,
-  githubUsername: string,
-  key: string
-): Promise<KeyRecord> {
+export async function storeKey(userId: string, githubUsername: string, key: string): Promise<KeyRecord> {
+  const supabase = createServiceClient();
   const keyHash = hashKey(key);
-  const record: KeyRecord = {
+  const keyPrefix = key.slice(0, 16) + "...";
+
+  // Delete existing key for this user
+  await supabase.from("api_keys").delete().eq("user_id", userId);
+
+  const { error } = await supabase.from("api_keys").insert({
+    user_id: userId,
+    key_hash: keyHash,
+    key_prefix: keyPrefix,
+    github_username: githubUsername,
+    revoked: false,
+    submission_count: 0,
+  });
+
+  if (error) throw new Error(`Failed to store key: ${error.message}`);
+
+  return {
     keyHash,
-    keyPrefix: key.slice(0, 16) + "...",
-    githubId,
+    keyPrefix,
     githubUsername,
     createdAt: new Date().toISOString(),
     lastUsedAt: null,
     submissionCount: 0,
     revoked: false,
   };
-  // Store by user: user:<githubId>:key -> record
-  await kv.set(`user:${githubId}:key`, record);
-  // Store hash lookup: keyHash:<hash> -> githubId (for validation)
-  await kv.set(`keyHash:${keyHash}`, githubId);
-  return record;
 }
 
-// Get key record for a user
-export async function getUserKey(
-  githubId: string
-): Promise<KeyRecord | null> {
-  return kv.get<KeyRecord>(`user:${githubId}:key`);
+export async function getUserKey(userId: string): Promise<KeyRecord | null> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("api_keys")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("revoked", false)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    keyHash: data.key_hash,
+    keyPrefix: data.key_prefix,
+    githubUsername: data.github_username,
+    createdAt: data.created_at,
+    lastUsedAt: data.last_used_at,
+    submissionCount: data.submission_count,
+    revoked: data.revoked,
+  };
 }
 
-// Validate a key (returns githubId if valid, null if invalid/revoked)
-export async function validateKeyFromStore(
-  key: string
-): Promise<string | null> {
+export async function validateKeyFromStore(key: string): Promise<string | null> {
+  const supabase = createServiceClient();
   const keyHash = hashKey(key);
-  const githubId = await kv.get<string>(`keyHash:${keyHash}`);
-  if (!githubId) return null;
-  const record = await kv.get<KeyRecord>(`user:${githubId}:key`);
-  if (!record || record.revoked || record.keyHash !== keyHash) return null;
-  return githubId;
+
+  const { data, error } = await supabase
+    .from("api_keys")
+    .select("user_id, revoked")
+    .eq("key_hash", keyHash)
+    .single();
+
+  if (error || !data || data.revoked) return null;
+  return data.user_id;
 }
 
-// Revoke a user key
-export async function revokeKey(githubId: string): Promise<void> {
-  const record = await kv.get<KeyRecord>(`user:${githubId}:key`);
-  if (!record) return;
-  // Remove hash lookup
-  await kv.del(`keyHash:${record.keyHash}`);
-  // Mark as revoked
-  await kv.set(`user:${githubId}:key`, { ...record, revoked: true });
+export async function revokeKey(userId: string): Promise<void> {
+  const supabase = createServiceClient();
+  await supabase.from("api_keys").update({ revoked: true }).eq("user_id", userId);
 }
 
-// Update last used / increment counter
-export async function recordKeyUsage(githubId: string): Promise<void> {
-  const record = await kv.get<KeyRecord>(`user:${githubId}:key`);
-  if (!record) return;
-  await kv.set(`user:${githubId}:key`, {
-    ...record,
-    lastUsedAt: new Date().toISOString(),
-    submissionCount: record.submissionCount + 1,
-  });
+export async function recordKeyUsage(userId: string): Promise<void> {
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from("api_keys")
+    .select("submission_count")
+    .eq("user_id", userId)
+    .single();
+
+  if (data) {
+    await supabase
+      .from("api_keys")
+      .update({
+        last_used_at: new Date().toISOString(),
+        submission_count: (data.submission_count || 0) + 1,
+      })
+      .eq("user_id", userId);
+  }
 }
