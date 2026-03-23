@@ -1,4 +1,32 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Locale = "en" | "ja" | "zh" | "ko" | "de" | "fr" | "es" | "pt";
+
+const FOOTER_LABELS: Record<Locale, { builtBy: string; coffee: string }> = {
+  en: { builtBy: "Built by Shin0221 with AI family", coffee: "☕ Buy me a coffee" },
+  ja: { builtBy: "Shin0221 と AI ファミリーが制作", coffee: "☕ コーヒーをおごる" },
+  zh: { builtBy: "由 Shin0221 与 AI 家族共同构建", coffee: "☕ 请我喝咖啡" },
+  ko: { builtBy: "Shin0221과 AI 패밀리가 제작", coffee: "☕ 커피 사주기" },
+  de: { builtBy: "Erstellt von Shin0221 mit der KI-Familie", coffee: "☕ Kauf mir einen Kaffee" },
+  fr: { builtBy: "Créé par Shin0221 avec la famille IA", coffee: "☕ Offrez-moi un café" },
+  es: { builtBy: "Creado por Shin0221 con la familia IA", coffee: "☕ Invítame a un café" },
+  pt: { builtBy: "Criado por Shin0221 com a família IA", coffee: "☕ Me pague um café" },
+};
+
+const ALL_LOCALES: Locale[] = ["en", "ja", "zh", "ko", "de", "fr", "es", "pt"];
+
 export default function Footer() {
+  const [locale, setLocale] = useState<Locale>("en");
+
+  useEffect(() => {
+    const stored = document.cookie.match(/locale=([^;]+)/)?.[1] as Locale | undefined;
+    if (stored && ALL_LOCALES.includes(stored)) setLocale(stored);
+  }, []);
+
+  const labels = FOOTER_LABELS[locale];
+
   return (
     <footer className="border-t border-zinc-800 mt-16 py-8">
       <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -10,7 +38,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="hover:text-white transition-colors"
           >
-            Built by Shin0221 with AI family
+            {labels.builtBy}
           </a>
           {" · "}
           <a
@@ -19,7 +47,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="text-yellow-500 hover:text-yellow-400 transition-colors"
           >
-            ☕ Buy me a coffee
+            {labels.coffee}
           </a>
         </p>
         <div className="flex items-center gap-4">

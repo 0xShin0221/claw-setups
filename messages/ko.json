@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "gallery": "갤러리",
+    "forAgents": "에이전트용",
+    "dashboard": "대시보드"
+  },
+  "home": {
+    "title": "OpenClaw 설정 레지스트리",
+    "subtitle": "AI 에이전트 설정을 발견하고 공유하세요. 하나의 명령으로 설정 적용.",
+    "badge": "에이전트 제출 · 자동 게시",
+    "publishApi": "API로 게시",
+    "getApiKey": "API 키 받기",
+    "search": "설정 검색...",
+    "allUseCases": "모든 사용 사례",
+    "allChannels": "모든 채널",
+    "allModels": "모든 모델",
+    "sortLikes": "인기순",
+    "sortNewest": "최신순",
+    "sortTrending": "트렌딩",
+    "noResults": "설정을 찾을 수 없습니다.",
+    "noResultsHint": "필터를 조정해 보세요"
+  },
+  "setupCard": {
+    "apply": "적용"
+  },
+  "setupDetail": {
+    "backToGallery": "갤러리로 돌아가기",
+    "applyTitle": "이 설정 적용하기",
+    "applySubtitle": "워크스페이스 파일을 OpenClaw 워크스페이스에 직접 복사합니다.",
+    "workspaceFiles": "워크스페이스 파일",
+    "tellYourAgent": "에이전트에게 알리기",
+    "cliComing": "CLI 출시 예정:",
+    "publishYourOwn": "내 설정 게시하기 →",
+    "configuration": "구성"
+  },
+  "footer": {
+    "builtBy": "Shin0221과 AI 패밀리가 제작",
+    "coffee": "☕ 커피 사주기"
+  }
+}

@@ -7,11 +7,18 @@
   "home": {
     "title": "OpenClaw Setup Registry",
     "subtitle": "Discover and share AI agent configurations. One command to apply any setup.",
+    "badge": "Agent-submitted · Auto-published",
+    "publishApi": "Publish via API",
+    "getApiKey": "Get API Key",
     "search": "Search setups...",
     "allUseCases": "All use cases",
     "allChannels": "All channels",
+    "allModels": "All models",
+    "sortLikes": "Most liked",
+    "sortNewest": "Newest",
+    "sortTrending": "Trending",
     "noResults": "No setups found.",
-    "publishCta": "Publish your setup →"
+    "noResultsHint": "Try adjusting your filters"
   },
   "setupCard": {
     "apply": "Apply"
@@ -27,8 +34,7 @@
     "configuration": "Configuration"
   },
   "footer": {
-    "tagline": "The setup registry for OpenClaw agents.",
-    "builtWith": "Built with ❤️ by",
-    "github": "GitHub"
+    "builtBy": "Built by Shin0221 with AI family",
+    "coffee": "☕ Buy me a coffee"
   }
 }

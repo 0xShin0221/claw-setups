@@ -13,6 +13,13 @@ interface Props {
   onModelChange: (v: string) => void;
   sort: string;
   onSortChange: (v: string) => void;
+  searchPlaceholder?: string;
+  allUseCases?: string;
+  allChannels?: string;
+  allModels?: string;
+  sortLikes?: string;
+  sortNewest?: string;
+  sortTrending?: string;
 }
 
 export default function SearchAndFilter({
@@ -26,6 +33,13 @@ export default function SearchAndFilter({
   onModelChange,
   sort,
   onSortChange,
+  searchPlaceholder = "Search setups...",
+  allUseCases = "All use cases",
+  allChannels = "All channels",
+  allModels = "All models",
+  sortLikes = "Most liked",
+  sortNewest = "Newest",
+  sortTrending = "Trending",
 }: Props) {
   return (
     <div className="space-y-4">
@@ -45,7 +59,7 @@ export default function SearchAndFilter({
         </svg>
         <input
           type="text"
-          placeholder="Search setups..."
+          placeholder={searchPlaceholder}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-[#E8404A]/50 transition-colors"
@@ -58,7 +72,7 @@ export default function SearchAndFilter({
           onChange={(e) => onChannelChange(e.target.value)}
           className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto"
         >
-          <option value="">All Channels</option>
+          <option value="">{allChannels}</option>
           {CHANNELS.map((ch) => (
             <option key={ch} value={ch}>
               {ch.charAt(0).toUpperCase() + ch.slice(1)}
@@ -71,7 +85,7 @@ export default function SearchAndFilter({
           onChange={(e) => onModelChange(e.target.value)}
           className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto"
         >
-          <option value="">All Models</option>
+          <option value="">{allModels}</option>
           {MODELS.map((m) => (
             <option key={m} value={m}>
               {m.split("/").pop()}
@@ -84,7 +98,7 @@ export default function SearchAndFilter({
           onChange={(e) => onUseCaseChange(e.target.value)}
           className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto"
         >
-          <option value="">All Use Cases</option>
+          <option value="">{allUseCases}</option>
           {USE_CASES.map((uc) => (
             <option key={uc} value={uc}>
               {uc
@@ -100,9 +114,9 @@ export default function SearchAndFilter({
           onChange={(e) => onSortChange(e.target.value)}
           className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto sm:ml-auto"
         >
-          <option value="likes">Most Liked</option>
-          <option value="newest">Newest</option>
-          <option value="trending">Trending</option>
+          <option value="likes">{sortLikes}</option>
+          <option value="newest">{sortNewest}</option>
+          <option value="trending">{sortTrending}</option>
         </select>
       </div>
     </div>

@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "gallery": "Galerie",
+    "forAgents": "Für Agenten",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "title": "OpenClaw Setup-Verzeichnis",
+    "subtitle": "KI-Agenten-Konfigurationen entdecken und teilen. Ein Befehl zum Anwenden.",
+    "badge": "Von Agenten eingereicht · Automatisch veröffentlicht",
+    "publishApi": "Per API veröffentlichen",
+    "getApiKey": "API-Schlüssel holen",
+    "search": "Setups suchen...",
+    "allUseCases": "Alle Anwendungsfälle",
+    "allChannels": "Alle Kanäle",
+    "allModels": "Alle Modelle",
+    "sortLikes": "Beliebteste",
+    "sortNewest": "Neueste",
+    "sortTrending": "Trending",
+    "noResults": "Keine Setups gefunden.",
+    "noResultsHint": "Filter anpassen"
+  },
+  "setupCard": {
+    "apply": "Anwenden"
+  },
+  "setupDetail": {
+    "backToGallery": "Zurück zur Galerie",
+    "applyTitle": "Dieses Setup anwenden",
+    "applySubtitle": "Workspace-Dateien direkt in Ihren OpenClaw-Workspace kopieren.",
+    "workspaceFiles": "Workspace-Dateien",
+    "tellYourAgent": "Agenten informieren",
+    "cliComing": "CLI demnächst:",
+    "publishYourOwn": "Eigenes Setup veröffentlichen →",
+    "configuration": "Konfiguration"
+  },
+  "footer": {
+    "builtBy": "Erstellt von Shin0221 mit der KI-Familie",
+    "coffee": "☕ Kauf mir einen Kaffee"
+  }
+}

@@ -5,7 +5,31 @@ import { Setup } from "@/lib/types";
 import SetupCard from "./SetupCard";
 import SearchAndFilter from "./SearchAndFilter";
 
-export default function Gallery({ setups }: { setups: Setup[] }) {
+interface GalleryProps {
+  setups: Setup[];
+  searchPlaceholder?: string;
+  allUseCases?: string;
+  allChannels?: string;
+  allModels?: string;
+  sortLikes?: string;
+  sortNewest?: string;
+  sortTrending?: string;
+  noResults?: string;
+  noResultsHint?: string;
+}
+
+export default function Gallery({
+  setups,
+  searchPlaceholder = "Search setups...",
+  allUseCases = "All use cases",
+  allChannels = "All channels",
+  allModels = "All models",
+  sortLikes = "Most liked",
+  sortNewest = "Newest",
+  sortTrending = "Trending",
+  noResults = "No setups found.",
+  noResultsHint = "Try adjusting your filters",
+}: GalleryProps) {
   const [search, setSearch] = useState("");
   const [channelFilter, setChannelFilter] = useState("");
   const [useCaseFilter, setUseCaseFilter] = useState("");
@@ -73,6 +97,13 @@ export default function Gallery({ setups }: { setups: Setup[] }) {
         onModelChange={setModelFilter}
         sort={sort}
         onSortChange={setSort}
+        searchPlaceholder={searchPlaceholder}
+        allUseCases={allUseCases}
+        allChannels={allChannels}
+        allModels={allModels}
+        sortLikes={sortLikes}
+        sortNewest={sortNewest}
+        sortTrending={sortTrending}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
@@ -83,8 +114,8 @@ export default function Gallery({ setups }: { setups: Setup[] }) {
 
       {filtered.length === 0 && (
         <div className="text-center py-16 text-zinc-500">
-          <p className="text-lg">No setups found</p>
-          <p className="text-sm mt-1">Try adjusting your filters</p>
+          <p className="text-lg">{noResults}</p>
+          <p className="text-sm mt-1">{noResultsHint}</p>
         </div>
       )}
     </div>

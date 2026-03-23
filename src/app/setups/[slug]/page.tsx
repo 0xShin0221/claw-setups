@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAllSlugs, getSetupBySlug } from "@/lib/setups";
 import { CHANNEL_COLORS } from "@/lib/constants";
 import CopyButton from "@/components/CopyButton";
+import { getLocale, getTranslations } from "@/lib/i18n";
 
 const BASE_URL = process.env.BASE_URL || "https://claw-setups.vercel.app";
 
@@ -38,6 +39,9 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
   const setup = getSetupBySlug(params.slug);
   if (!setup) notFound();
 
+  const locale = getLocale();
+  const t = getTranslations(locale);
+
   const modelShort = setup.model.split("/").pop() || setup.model;
   const configJson = JSON.stringify(setup.config, null, 2);
 
@@ -71,7 +75,7 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        Back to Gallery
+        {t("setupDetail.backToGallery")}
       </Link>
 
       <div className="mt-4">
@@ -130,7 +134,7 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
         {/* Config */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Configuration</h2>
+            <h2 className="text-lg font-semibold">{t("setupDetail.configuration")}</h2>
             <CopyButton text={configJson} />
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
@@ -143,7 +147,7 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
         {/* Workspace Files */}
         {setup.workspaceFiles && Object.keys(setup.workspaceFiles).length > 0 && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-3">Workspace Files</h2>
+            <h2 className="text-lg font-semibold mb-3">{t("setupDetail.workspaceFiles")}</h2>
             <div className="space-y-4">
               {Object.entries(setup.workspaceFiles).map(([name, content]) => (
                 <div key={name} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
@@ -162,16 +166,16 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
         {/* Apply this setup */}
         <div className="rounded-xl border border-[#E8404A]/30 bg-[#E8404A]/5 p-6 space-y-5">
           <div>
-            <h2 className="text-lg font-semibold text-white">Apply this setup</h2>
+            <h2 className="text-lg font-semibold text-white">{t("setupDetail.applyTitle")}</h2>
             <p className="text-sm text-zinc-400 mt-1">
-              Copy workspace files directly into your OpenClaw workspace.
+              {t("setupDetail.applySubtitle")}
             </p>
           </div>
 
           {/* Workspace files download */}
           {setup.workspaceFiles && Object.keys(setup.workspaceFiles).filter(k => setup.workspaceFiles![k]).length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Workspace files</p>
+              <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">{t("setupDetail.workspaceFiles")}</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {Object.entries(setup.workspaceFiles).filter(([, v]) => v).map(([name, content]) => (
                   <div key={name} className="flex items-center justify-between gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5">
@@ -202,7 +206,7 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
 
           {/* Tell your agent */}
           <div className="space-y-2">
-            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Tell your agent</p>
+            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">{t("setupDetail.tellYourAgent")}</p>
             <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-3 py-2.5">
               <code className="flex-1 text-xs sm:text-sm font-mono text-zinc-300 break-all leading-relaxed">
                 Apply the &ldquo;{setup.title}&rdquo; setup from claw-setups.vercel.app/setups/{setup.id}
@@ -216,7 +220,7 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span>CLI coming: <code className="text-zinc-500">openclaw setup apply {setup.id}</code></span>
+            <span>{t("setupDetail.cliComing")} <code className="text-zinc-500">openclaw setup apply {setup.id}</code></span>
           </div>
         </div>
 
@@ -226,7 +230,7 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
             href="/dashboard"
             className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
           >
-            Publish your own setup →
+            {t("setupDetail.publishYourOwn")}
           </Link>
         </div>
       </div>

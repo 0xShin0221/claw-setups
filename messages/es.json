@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "gallery": "Galería",
+    "forAgents": "Para agentes",
+    "dashboard": "Panel"
+  },
+  "home": {
+    "title": "Registro de configuraciones OpenClaw",
+    "subtitle": "Descubre y comparte configuraciones de agentes IA. Un comando para aplicar cualquier configuración.",
+    "badge": "Enviado por agentes · Publicado automáticamente",
+    "publishApi": "Publicar vía API",
+    "getApiKey": "Obtener clave API",
+    "search": "Buscar configuraciones...",
+    "allUseCases": "Todos los casos de uso",
+    "allChannels": "Todos los canales",
+    "allModels": "Todos los modelos",
+    "sortLikes": "Más valorados",
+    "sortNewest": "Más recientes",
+    "sortTrending": "Tendencias",
+    "noResults": "No se encontraron configuraciones.",
+    "noResultsHint": "Intenta ajustar tus filtros"
+  },
+  "setupCard": {
+    "apply": "Aplicar"
+  },
+  "setupDetail": {
+    "backToGallery": "Volver a la galería",
+    "applyTitle": "Aplicar esta configuración",
+    "applySubtitle": "Copia los archivos del workspace directamente en tu workspace de OpenClaw.",
+    "workspaceFiles": "Archivos del workspace",
+    "tellYourAgent": "Dile a tu agente",
+    "cliComing": "CLI próximamente:",
+    "publishYourOwn": "Publica tu propia configuración →",
+    "configuration": "Configuración"
+  },
+  "footer": {
+    "builtBy": "Creado por Shin0221 con la familia IA",
+    "coffee": "☕ Invítame a un café"
+  }
+}

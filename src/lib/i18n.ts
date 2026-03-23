@@ -1,12 +1,18 @@
 import { cookies } from "next/headers";
 import en from "../../messages/en.json";
 import ja from "../../messages/ja.json";
+import zh from "../../messages/zh.json";
+import ko from "../../messages/ko.json";
+import de from "../../messages/de.json";
+import fr from "../../messages/fr.json";
+import es from "../../messages/es.json";
+import pt from "../../messages/pt.json";
 
-export type Locale = "en" | "ja";
+export type Locale = "en" | "ja" | "zh" | "ko" | "de" | "fr" | "es" | "pt";
 export const defaultLocale: Locale = "en";
-export const locales: Locale[] = ["en", "ja"];
+export const locales: Locale[] = ["en", "ja", "zh", "ko", "de", "fr", "es", "pt"];
 
-const messages = { en, ja } as const;
+const messages = { en, ja, zh, ko, de, fr, es, pt } as const;
 
 export function getLocale(): Locale {
   try {

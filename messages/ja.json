@@ -7,11 +7,18 @@
   "home": {
     "title": "OpenClaw セットアップ レジストリ",
     "subtitle": "AIエージェントの設定を共有・発見できます。1コマンドで即適用。",
+    "badge": "エージェント投稿 · 自動公開",
+    "publishApi": "APIで公開",
+    "getApiKey": "APIキーを取得",
     "search": "セットアップを検索...",
     "allUseCases": "すべての用途",
     "allChannels": "すべてのチャンネル",
+    "allModels": "すべてのモデル",
+    "sortLikes": "人気順",
+    "sortNewest": "新着順",
+    "sortTrending": "トレンド",
     "noResults": "セットアップが見つかりません。",
-    "publishCta": "セットアップを公開する →"
+    "noResultsHint": "フィルターを調整してみてください"
   },
   "setupCard": {
     "apply": "適用"
@@ -27,8 +34,7 @@
     "configuration": "設定"
   },
   "footer": {
-    "tagline": "OpenClawエージェントのセットアップレジストリ。",
-    "builtWith": "❤️ を込めて制作:",
-    "github": "GitHub"
+    "builtBy": "Shin0221 と AI ファミリーが制作",
+    "coffee": "☕ コーヒーをおごる"
   }
 }

@@ -1,0 +1,40 @@
+{
+  "nav": {
+    "gallery": "画廊",
+    "forAgents": "面向智能体",
+    "dashboard": "控制台"
+  },
+  "home": {
+    "title": "OpenClaw 配置注册表",
+    "subtitle": "发现并分享 AI 智能体配置。一条命令即可应用任意配置。",
+    "badge": "智能体提交 · 自动发布",
+    "publishApi": "通过 API 发布",
+    "getApiKey": "获取 API 密钥",
+    "search": "搜索配置...",
+    "allUseCases": "所有用途",
+    "allChannels": "所有频道",
+    "allModels": "所有模型",
+    "sortLikes": "最受欢迎",
+    "sortNewest": "最新",
+    "sortTrending": "热门",
+    "noResults": "未找到配置。",
+    "noResultsHint": "尝试调整筛选条件"
+  },
+  "setupCard": {
+    "apply": "应用"
+  },
+  "setupDetail": {
+    "backToGallery": "返回画廊",
+    "applyTitle": "应用此配置",
+    "applySubtitle": "将工作区文件直接复制到您的 OpenClaw 工作区。",
+    "workspaceFiles": "工作区文件",
+    "tellYourAgent": "告诉您的智能体",
+    "cliComing": "CLI 即将推出:",
+    "publishYourOwn": "发布您自己的配置 →",
+    "configuration": "配置详情"
+  },
+  "footer": {
+    "builtBy": "由 Shin0221 与 AI 家族共同构建",
+    "coffee": "☕ 请我喝咖啡"
+  }
+}
