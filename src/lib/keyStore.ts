@@ -17,6 +17,8 @@ export interface KeyRecord {
   lastUsedAt: string | null;
   submissionCount: number;
   revoked: boolean;
+  xUsername: string | null;
+  xVerified: boolean;
 }
 
 export async function storeKey(userId: string, githubUsername: string, key: string): Promise<KeyRecord> {
@@ -47,6 +49,8 @@ export async function storeKey(userId: string, githubUsername: string, key: stri
     lastUsedAt: null,
     submissionCount: 0,
     revoked: false,
+    xUsername: null,
+    xVerified: false,
   };
 }
 
@@ -70,6 +74,8 @@ export async function getUserKey(userId: string): Promise<KeyRecord | null> {
     lastUsedAt: data.last_used_at,
     submissionCount: data.submission_count,
     revoked: data.revoked,
+    xUsername: data.x_username ?? null,
+    xVerified: data.x_verified ?? false,
   };
 }
 
@@ -92,6 +98,17 @@ export async function revokeKey(userId: string): Promise<void> {
   const supabase = createServiceClient();
   if (!supabase) throw new Error("Supabase not configured");
   await supabase.from("api_keys").update({ revoked: true }).eq("user_id", userId);
+}
+
+export async function updateXVerification(userId: string, xUsername: string): Promise<void> {
+  const supabase = createServiceClient();
+  if (!supabase) throw new Error("Supabase not configured");
+  const { error } = await supabase
+    .from("api_keys")
+    .update({ x_username: xUsername, x_verified: true })
+    .eq("user_id", userId)
+    .eq("revoked", false);
+  if (error) throw new Error(`Failed to update X verification: ${error.message}`);
 }
 
 export async function recordKeyUsage(userId: string): Promise<void> {

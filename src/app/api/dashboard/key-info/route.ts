@@ -18,9 +18,13 @@ export async function GET() {
   }
 
   const keyRecord = await getUserKey(user.id);
+  const twitterLinked = !!(user.identities?.some(
+    (id) => id.provider === "twitter"
+  ));
   return NextResponse.json({
     hasKey: !!keyRecord,
     keyRecord: keyRecord || null,
+    twitterLinked,
     user: {
       name: user.user_metadata?.full_name || user.user_metadata?.user_name,
       username: user.user_metadata?.user_name,

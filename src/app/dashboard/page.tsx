@@ -10,7 +10,10 @@ interface KeyInfo {
     createdAt: string;
     lastUsedAt: string | null;
     submissionCount: number;
+    xUsername: string | null;
+    xVerified: boolean;
   } | null;
+  twitterLinked: boolean;
   user: {
     name: string;
     username: string;
@@ -26,6 +29,7 @@ export default function DashboardPage() {
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [revoking, setRevoking] = useState(false);
+  const [linking, setLinking] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -61,6 +65,18 @@ export default function DashboardPage() {
     const res = await fetch("/api/dashboard/key-info");
     if (res.ok) {
       const data = await res.json();
+      if (data.twitterLinked && data.keyRecord && !data.keyRecord.xVerified) {
+        const verifyRes = await fetch("/api/dashboard/verify-x", { method: "POST" });
+        if (verifyRes.ok) {
+          const freshRes = await fetch("/api/dashboard/key-info");
+          if (freshRes.ok) {
+            const freshData = await freshRes.json();
+            setKeyInfo(freshData);
+            setLoading(false);
+            return;
+          }
+        }
+      }
       setKeyInfo(data);
     }
     setLoading(false);
@@ -104,6 +120,18 @@ export default function DashboardPage() {
     setNewKey(null);
     await fetchKeyInfo();
     setRevoking(false);
+  }
+
+  async function linkXAccount() {
+    const supabase = createClient();
+    if (!supabase) return;
+    setLinking(true);
+    await supabase.auth.linkIdentity({
+      provider: "twitter",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+      },
+    });
   }
 
   async function copyKey() {
@@ -238,6 +266,48 @@ export default function DashboardPage() {
             >
               {generating ? "Generating..." : "Generate API Key"}
             </button>
+          </div>
+        )}
+      </div>
+
+      {/* X Verification */}
+      <div className="rounded-lg border border-zinc-800 p-6 space-y-4">
+        <h2 className="font-semibold text-lg">X (Twitter) Verification</h2>
+        {keyInfo?.keyRecord?.xVerified && keyInfo.keyRecord.xUsername ? (
+          <div className="space-y-3">
+            <p className="text-sm text-zinc-300">
+              Verified as <span className="text-white font-medium">@{keyInfo.keyRecord.xUsername}</span>
+            </p>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just got my API key on claw-setups! Building agents that submit setups to the community gallery. Check it out: https://claw-setups.vercel.app")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              Share on X
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-zinc-400">
+              Link your X account to verify your identity and share your setups.
+            </p>
+            <button
+              onClick={linkXAccount}
+              disabled={!keyInfo?.hasKey || linking}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              {linking ? "Connecting..." : "Connect X Account"}
+            </button>
+            {!keyInfo?.hasKey && (
+              <p className="text-xs text-zinc-600">Generate an API key first to link your X account.</p>
+            )}
           </div>
         )}
       </div>
