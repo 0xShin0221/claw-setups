@@ -41,6 +41,8 @@ export default function DashboardPage() {
   const [submitModel, setSubmitModel] = useState("anthropic/claude-sonnet-4-6");
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ok: boolean; message: string; url?: string} | null>(null);
+  const [soulMdText, setSoulMdText] = useState("");
+  const [parsed, setParsed] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -154,6 +156,31 @@ export default function DashboardPage() {
       setVerifyError("Failed to generate code. Try again.");
     }
     setLinking(false);
+  }
+
+  function parseSoulMd(text: string) {
+    // Extract Name
+    const nameMatch = text.match(/\*\*Name[:\*]*\*?\*?\s*[:：]?\s*(.+)/i) ||
+                      text.match(/^#\s*SOUL\.md\s*-\s*(.+)/im) ||
+                      text.match(/You are\s+([^\n,.]+)/i);
+    const name = nameMatch?.[1]?.replace(/[*`]/g, "").trim() || "";
+
+    // Extract role/description  
+    const roleMatch = text.match(/\*\*Role[:\*]*\*?\*?\s*[:：]?\s*(.+)/i) ||
+                      text.match(/\*\*Domain[:\*]*\*?\*?\s*[:：]?\s*(.+)/i) ||
+                      text.match(/##\s*Core Identity[\s\S]*?\n([^\n#]+)/);
+    const role = roleMatch?.[1]?.replace(/[*`]/g, "").trim() || "";
+
+    // Extract model from text
+    const modelMatch = text.match(/claude-sonnet-4-6|claude-opus-4-5|claude-haiku-3-5|gpt-4o-mini|gpt-4o/i);
+    const model = modelMatch ? `anthropic/${modelMatch[0].toLowerCase()}` : "anthropic/claude-sonnet-4-6";
+
+    if (name) {
+      setSubmitTitle(`${name}'s OpenClaw Setup`);
+      setSubmitDesc(role || `${name} — an AI agent setup built with OpenClaw.`);
+      setSubmitModel(model);
+      setParsed(true);
+    }
   }
 
   async function submitSetup() {
@@ -460,7 +487,6 @@ export default function DashboardPage() {
       {keyInfo?.hasKey && (
         <div className="rounded-lg border border-zinc-800 p-6 space-y-4">
           <h2 className="font-semibold text-lg">Publish a Setup</h2>
-          <p className="text-sm text-zinc-400">Share your OpenClaw config with the community.</p>
 
           {submitResult ? (
             <div className={`rounded-lg p-4 space-y-2 ${submitResult.ok ? "bg-green-950/50 border border-green-800" : "bg-red-950/50 border border-red-900"}`}>
@@ -468,28 +494,59 @@ export default function DashboardPage() {
                 {submitResult.ok ? "✅" : "❌"} {submitResult.message}
               </p>
               {submitResult.url && (
-                <a href={submitResult.url} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-400 hover:text-white underline">
+                <a href={submitResult.url} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-400 hover:text-white underline block">
                   View PR →
                 </a>
               )}
-              <button onClick={() => setSubmitResult(null)} className="text-xs text-zinc-600 hover:text-zinc-400 block">
-                Submit another
+              <button onClick={() => { setSubmitResult(null); setParsed(false); setSoulMdText(""); }} className="text-xs text-zinc-600 hover:text-zinc-400 block">
+                Publish another
               </button>
             </div>
-          ) : (
+          ) : !parsed ? (
+            /* Step 1: Paste SOUL.md */
             <div className="space-y-3">
+              <p className="text-sm text-zinc-400">
+                Paste your <code className="text-zinc-300 bg-zinc-800 px-1 rounded">SOUL.md</code> or <code className="text-zinc-300 bg-zinc-800 px-1 rounded">AGENTS.md</code> — we&apos;ll fill in the rest automatically.
+              </p>
+              <textarea
+                placeholder={`# SOUL.md - Ace\n\n**Name:** Ace（エース）\n**Role:** Full-stack dev AI at DigDaTech LLC\n...\n\nPaste your workspace file here`}
+                value={soulMdText}
+                onChange={(e) => setSoulMdText(e.target.value)}
+                rows={8}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-zinc-300 placeholder-zinc-700 focus:outline-none focus:border-[#E8404A]/50 resize-none font-mono"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => parseSoulMd(soulMdText)}
+                  disabled={!soulMdText.trim()}
+                  className="px-4 py-2 text-sm bg-[#E8404A] hover:bg-[#d63840] text-white rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Auto-fill →
+                </button>
+                <button
+                  onClick={() => setParsed(true)}
+                  className="px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+                >
+                  Fill manually
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Step 2: Review & publish */
+            <div className="space-y-3">
+              <p className="text-xs text-zinc-500 font-medium uppercase tracking-wide">Review & publish</p>
               <input
                 type="text"
-                placeholder="Setup title (e.g. My Discord Dev Bot)"
+                placeholder="Setup title"
                 value={submitTitle}
                 onChange={(e) => setSubmitTitle(e.target.value)}
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#E8404A]/50"
               />
               <textarea
-                placeholder="Describe what this setup does..."
+                placeholder="What does this setup do?"
                 value={submitDesc}
                 onChange={(e) => setSubmitDesc(e.target.value)}
-                rows={3}
+                rows={2}
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#E8404A]/50 resize-none"
               />
               <select
@@ -503,7 +560,7 @@ export default function DashboardPage() {
                 <option value="openai/gpt-4o">gpt-4o</option>
                 <option value="openai/gpt-4o-mini">gpt-4o-mini</option>
               </select>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={submitSetup}
                   disabled={submitting || !submitTitle.trim() || !submitDesc.trim()}
@@ -511,7 +568,9 @@ export default function DashboardPage() {
                 >
                   {submitting ? "Publishing..." : "Publish to Gallery"}
                 </button>
-                <a href="/for-agents" className="text-xs text-zinc-600 hover:text-zinc-400">API docs →</a>
+                <button onClick={() => setParsed(false)} className="text-xs text-zinc-600 hover:text-zinc-400">
+                  ← Back
+                </button>
               </div>
             </div>
           )}
