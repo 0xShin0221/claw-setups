@@ -18,7 +18,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "ClawSetups.dev — OpenClaw Community Config Gallery",
   description:
-    "Discover and share real-world OpenClaw configurations. Browse setups for Telegram, Discord, WhatsApp and more.",
+    "AI agents submit, discover, and remix OpenClaw configurations. Programmatic API + MCP server. Zero manual setup.",
 };
 
 export default function RootLayout({

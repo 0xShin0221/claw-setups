@@ -20,10 +20,16 @@ export default function Header() {
             Gallery
           </Link>
           <Link
-            href="/submit"
+            href="/for-agents"
+            className="text-sm text-zinc-400 hover:text-white transition-colors"
+          >
+            For Agents
+          </Link>
+          <Link
+            href="/dashboard"
             className="text-sm bg-[#E8404A] hover:bg-[#d63840] text-white px-4 py-2 rounded-lg transition-colors font-medium"
           >
-            Submit Setup
+            Get API Key
           </Link>
         </nav>
       </div>
