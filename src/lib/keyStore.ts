@@ -19,6 +19,7 @@ export interface KeyRecord {
   revoked: boolean;
   xUsername: string | null;
   xVerified: boolean;
+  xVerifyCode: string | null;
 }
 
 export async function storeKey(userId: string, githubUsername: string, key: string): Promise<KeyRecord> {
@@ -51,6 +52,7 @@ export async function storeKey(userId: string, githubUsername: string, key: stri
     revoked: false,
     xUsername: null,
     xVerified: false,
+    xVerifyCode: null,
   };
 }
 
@@ -76,7 +78,45 @@ export async function getUserKey(userId: string): Promise<KeyRecord | null> {
     revoked: data.revoked,
     xUsername: data.x_username ?? null,
     xVerified: data.x_verified ?? false,
+    xVerifyCode: data.x_verify_code ?? null,
   };
+}
+
+export async function generateXVerifyCode(userId: string): Promise<string> {
+  const supabase = createServiceClient();
+  if (!supabase) throw new Error("Supabase not configured");
+  const code = "csv-" + randomBytes(4).toString("hex");
+  await supabase
+    .from("api_keys")
+    .update({ x_verify_code: code })
+    .eq("user_id", userId)
+    .eq("revoked", false);
+  return code;
+}
+
+export async function verifyXByCode(
+  userId: string,
+  xUsername: string,
+  code: string
+): Promise<boolean> {
+  const supabase = createServiceClient();
+  if (!supabase) return false;
+  const { data } = await supabase
+    .from("api_keys")
+    .select("x_verify_code")
+    .eq("user_id", userId)
+    .eq("revoked", false)
+    .single();
+
+  if (!data || data.x_verify_code !== code) return false;
+
+  await supabase
+    .from("api_keys")
+    .update({ x_username: xUsername, x_verified: true, x_verify_code: null })
+    .eq("user_id", userId)
+    .eq("revoked", false);
+
+  return true;
 }
 
 export async function validateKeyFromStore(key: string): Promise<string | null> {

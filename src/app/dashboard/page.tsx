@@ -12,6 +12,7 @@ interface KeyInfo {
     submissionCount: number;
     xUsername: string | null;
     xVerified: boolean;
+    xVerifyCode: string | null;
   } | null;
   twitterLinked: boolean;
   user: {
@@ -30,6 +31,10 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [revoking, setRevoking] = useState(false);
   const [linking, setLinking] = useState(false);
+  const [verifyCode, setVerifyCode] = useState<string | null>(null);
+  const [xHandleInput, setXHandleInput] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -132,23 +137,37 @@ export default function DashboardPage() {
     setRevoking(false);
   }
 
-  async function linkXAccount() {
-    const supabase = createClient();
-    if (!supabase) return;
+  async function startXVerify() {
     setLinking(true);
-    const { error } = await supabase.auth.linkIdentity({
-      provider: "twitter",
-      options: {
-        // Use client-side callback page to preserve PKCE verifier in browser
-        redirectTo: `${window.location.origin}/auth/x-callback`,
-      },
-    });
-    if (error) {
-      console.error("Twitter link error:", error);
-      alert(`X連携エラー: ${error.message}`);
-      setLinking(false);
+    setVerifyError(null);
+    const res = await fetch("/api/dashboard/x-code", { method: "POST" });
+    const data = await res.json();
+    if (data.ok) {
+      setVerifyCode(data.code);
+    } else {
+      setVerifyError("Failed to generate code. Try again.");
     }
-    // No error = redirect to Twitter OAuth is happening
+    setLinking(false);
+  }
+
+  async function completeXVerify() {
+    if (!verifyCode || !xHandleInput.trim()) return;
+    setVerifying(true);
+    setVerifyError(null);
+    const res = await fetch("/api/dashboard/x-verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ xUsername: xHandleInput.trim(), code: verifyCode }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setVerifyCode(null);
+      setXHandleInput("");
+      await fetchKeyInfo();
+    } else {
+      setVerifyError(data.error || "Verification failed. Make sure you posted the tweet.");
+    }
+    setVerifying(false);
   }
 
   async function copyKey() {
@@ -289,14 +308,25 @@ export default function DashboardPage() {
 
       {/* X Verification */}
       <div className="rounded-lg border border-zinc-800 p-6 space-y-4">
-        <h2 className="font-semibold text-lg">X (Twitter) Verification</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-lg">X (Twitter) Verification</h2>
+          {keyInfo?.keyRecord?.xVerified && (
+            <span className="flex items-center gap-1 text-xs text-blue-400 border border-blue-400/30 bg-blue-400/10 px-2 py-0.5 rounded-full font-medium">
+              ✓ Verified
+            </span>
+          )}
+        </div>
+
         {keyInfo?.keyRecord?.xVerified && keyInfo.keyRecord.xUsername ? (
           <div className="space-y-3">
             <p className="text-sm text-zinc-300">
-              Verified as <span className="text-white font-medium">@{keyInfo.keyRecord.xUsername}</span>
+              Verified as{" "}
+              <a href={`https://x.com/${keyInfo.keyRecord.xUsername}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                @{keyInfo.keyRecord.xUsername}
+              </a>
             </p>
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just got my API key on claw-setups! Building agents that submit setups to the community gallery. Check it out: https://claw-setups.vercel.app")}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just published my AI agent setup on ClawSetups.dev 🦞\nhttps://claw-setups.vercel.app #OpenClaw #AIAgents")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
@@ -307,23 +337,69 @@ export default function DashboardPage() {
               Share on X
             </a>
           </div>
+        ) : verifyCode ? (
+          /* Step 2: Tweet the code, then enter username */
+          <div className="space-y-4">
+            <div className="rounded-lg bg-zinc-900 border border-zinc-700 p-4 space-y-2">
+              <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Step 1 — Post this tweet</p>
+              <p className="text-sm text-zinc-200 font-mono leading-relaxed">
+                Verifying my claw-setups.vercel.app setup: {verifyCode}
+              </p>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Verifying my claw-setups.vercel.app setup: ${verifyCode}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-black hover:bg-zinc-900 border border-zinc-700 text-white rounded-lg transition-colors mt-1"
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                Open tweet
+              </a>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">Step 2 — Enter your @username</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="@yourusername"
+                  value={xHandleInput}
+                  onChange={(e) => setXHandleInput(e.target.value)}
+                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#E8404A]/50"
+                />
+                <button
+                  onClick={completeXVerify}
+                  disabled={verifying || !xHandleInput.trim()}
+                  className="px-4 py-2 text-sm bg-[#E8404A] hover:bg-[#d63840] text-white rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {verifying ? "Checking..." : "Verify"}
+                </button>
+              </div>
+              {verifyError && <p className="text-xs text-red-400">{verifyError}</p>}
+              <button onClick={() => setVerifyCode(null)} className="text-xs text-zinc-600 hover:text-zinc-400">
+                Cancel
+              </button>
+            </div>
+          </div>
         ) : (
+          /* Step 0: Start verification */
           <div className="space-y-3">
             <p className="text-sm text-zinc-400">
-              Link your X account to verify your identity and share your setups.
+              Verify your X identity with a tweet — no OAuth needed. Your setups get a verified badge.
             </p>
             <button
-              onClick={linkXAccount}
+              onClick={startXVerify}
               disabled={!keyInfo?.hasKey || linking}
               className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
-              {linking ? "Connecting..." : "Connect X Account"}
+              {linking ? "Generating..." : "Verify with X"}
             </button>
             {!keyInfo?.hasKey && (
-              <p className="text-xs text-zinc-600">Generate an API key first to link your X account.</p>
+              <p className="text-xs text-zinc-600">Generate an API key first.</p>
             )}
           </div>
         )}
