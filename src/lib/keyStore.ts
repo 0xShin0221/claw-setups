@@ -21,6 +21,7 @@ export interface KeyRecord {
 
 export async function storeKey(userId: string, githubUsername: string, key: string): Promise<KeyRecord> {
   const supabase = createServiceClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const keyHash = hashKey(key);
   const keyPrefix = key.slice(0, 16) + "...";
 
@@ -51,6 +52,7 @@ export async function storeKey(userId: string, githubUsername: string, key: stri
 
 export async function getUserKey(userId: string): Promise<KeyRecord | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from("api_keys")
     .select("*")
@@ -73,6 +75,7 @@ export async function getUserKey(userId: string): Promise<KeyRecord | null> {
 
 export async function validateKeyFromStore(key: string): Promise<string | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
   const keyHash = hashKey(key);
 
   const { data, error } = await supabase
@@ -87,11 +90,13 @@ export async function validateKeyFromStore(key: string): Promise<string | null> 
 
 export async function revokeKey(userId: string): Promise<void> {
   const supabase = createServiceClient();
+  if (!supabase) throw new Error("Supabase not configured");
   await supabase.from("api_keys").update({ revoked: true }).eq("user_id", userId);
 }
 
 export async function recordKeyUsage(userId: string): Promise<void> {
   const supabase = createServiceClient();
+  if (!supabase) return;
   const { data } = await supabase
     .from("api_keys")
     .select("submission_count")

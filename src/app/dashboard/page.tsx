@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase-client";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase-client";
 
 interface KeyInfo {
   hasKey: boolean;
@@ -28,13 +28,33 @@ export default function DashboardPage() {
   const [revoking, setRevoking] = useState(false);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
     const supabase = createClient();
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) fetchKeyInfo();
       else setLoading(false);
     });
   }, []);
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-24 text-center space-y-6">
+        <div className="text-4xl">&#x1F6A7;</div>
+        <h1 className="text-3xl font-bold">Dashboard coming soon</h1>
+        <p className="text-zinc-400 max-w-md mx-auto">
+          Supabase setup is pending. The API key portal will be available once configuration is complete.
+        </p>
+      </div>
+    );
+  }
 
   async function fetchKeyInfo() {
     setLoading(true);
@@ -48,6 +68,7 @@ export default function DashboardPage() {
 
   async function signInWithGitHub() {
     const supabase = createClient();
+    if (!supabase) return;
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
@@ -56,6 +77,7 @@ export default function DashboardPage() {
 
   async function signOut() {
     const supabase = createClient();
+    if (!supabase) return;
     await supabase.auth.signOut();
     setSession(null);
     setKeyInfo(null);
