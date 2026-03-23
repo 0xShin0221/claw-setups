@@ -1,7 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+function LocaleSwitcher() {
+  const [locale, setLocale] = useState("en");
+
+  useEffect(() => {
+    const stored = document.cookie.match(/locale=([^;]+)/)?.[1];
+    if (stored === "ja" || stored === "en") setLocale(stored);
+  }, []);
+
+  const toggle = () => {
+    const next = locale === "en" ? "ja" : "en";
+    document.cookie = `locale=${next}; path=/; max-age=31536000; SameSite=Lax`;
+    setLocale(next);
+    window.location.reload();
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-1 rounded border border-zinc-800 hover:border-zinc-600"
+      title="Switch language"
+    >
+      {locale === "en" ? "🇯🇵 JA" : "🇺🇸 EN"}
+    </button>
+  );
+}
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,7 +44,8 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-6">
+        <nav className="hidden sm:flex items-center gap-4">
+          <LocaleSwitcher />
           <Link href="/" className="text-sm text-zinc-400 hover:text-white transition-colors">
             Gallery
           </Link>
@@ -54,6 +81,9 @@ export default function Header() {
       {/* Mobile menu */}
       {menuOpen && (
         <nav className="sm:hidden border-t border-zinc-800 px-4 py-3 flex flex-col gap-1 bg-zinc-950">
+          <div className="py-2 border-b border-zinc-800/50">
+            <LocaleSwitcher />
+          </div>
           <Link
             href="/"
             className="text-sm text-zinc-400 hover:text-white transition-colors py-2.5 border-b border-zinc-800/50"

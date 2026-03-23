@@ -4,12 +4,29 @@ import { getAllSlugs, getSetupBySlug } from "@/lib/setups";
 import { CHANNEL_COLORS } from "@/lib/constants";
 import CopyButton from "@/components/CopyButton";
 
+const BASE_URL = process.env.BASE_URL || "https://claw-setups.vercel.app";
+
 export function generateMetadata({ params }: { params: { slug: string } }) {
   const setup = getSetupBySlug(params.slug);
   if (!setup) return {};
   return {
-    title: `${setup.title} | ClawSetups.dev`,
+    title: setup.title,
     description: setup.description,
+    alternates: {
+      canonical: `${BASE_URL}/setups/${params.slug}`,
+    },
+    openGraph: {
+      title: `${setup.title} | ClawSetups.dev`,
+      description: setup.description,
+      url: `${BASE_URL}/setups/${params.slug}`,
+      images: [{ url: `${BASE_URL}/og-image.png`, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${setup.title} | ClawSetups.dev`,
+      description: setup.description,
+      creator: "@0xShin0221",
+    },
   };
 }
 
@@ -24,8 +41,29 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
   const modelShort = setup.model.split("/").pop() || setup.model;
   const configJson = JSON.stringify(setup.config, null, 2);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: setup.title,
+    description: setup.description,
+    url: `${BASE_URL}/setups/${setup.id}`,
+    author: {
+      "@type": "Person",
+      name: setup.author.name,
+      url: `https://github.com/${setup.author.github}`,
+    },
+    programmingLanguage: "YAML",
+    runtimePlatform: "OpenClaw",
+    keywords: [setup.useCase, setup.model, ...setup.channels, ...setup.skills].join(", "),
+    dateCreated: setup.createdAt,
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link
         href="/"
         className="text-sm text-zinc-500 hover:text-white transition-colors mb-6 inline-flex items-center gap-1"

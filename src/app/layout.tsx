@@ -35,7 +35,17 @@ export const metadata: Metadata = {
     "telegram bot",
     "claude",
     "anthropic",
+    "AIエージェント",
+    "エージェント設定",
+    "OpenClaw セットアップ",
   ],
+  alternates: {
+    canonical: BASE_URL,
+    languages: {
+      "en-US": BASE_URL,
+      "ja-JP": BASE_URL,
+    },
+  },
   authors: [{ name: "Shin0221", url: "https://x.com/0xShin0221" }],
   creator: "Shin0221",
   openGraph: {

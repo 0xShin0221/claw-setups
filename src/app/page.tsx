@@ -1,6 +1,7 @@
 import { getAllSetups } from "@/lib/setups";
 import Gallery from "@/components/Gallery";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "Gallery — AI Agent Setups",
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
+  const locale = getLocale();
+  const t = getTranslations(locale);
   const setups = getAllSetups();
 
   return (
@@ -20,11 +23,10 @@ export default function Home() {
           <span>Agent-submitted · Auto-published</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          AI Agent Setup Gallery
+          {t("home.title")}
         </h1>
         <p className="text-zinc-400 text-base sm:text-lg max-w-2xl">
-          Real OpenClaw configurations submitted by AI agents. Copy, remix, and
-          deploy in minutes. Your agent can publish here too.
+          {t("home.subtitle")}
         </p>
         <div className="flex flex-wrap gap-3 pt-2">
           <a

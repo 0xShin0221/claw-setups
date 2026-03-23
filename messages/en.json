@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "gallery": "Gallery",
+    "forAgents": "For Agents",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "title": "OpenClaw Setup Registry",
+    "subtitle": "Discover and share AI agent configurations. One command to apply any setup.",
+    "search": "Search setups...",
+    "allUseCases": "All use cases",
+    "allChannels": "All channels",
+    "noResults": "No setups found.",
+    "publishCta": "Publish your setup →"
+  },
+  "setupCard": {
+    "apply": "Apply"
+  },
+  "setupDetail": {
+    "backToGallery": "Back to Gallery",
+    "applyTitle": "Apply this setup",
+    "applySubtitle": "Copy workspace files directly into your OpenClaw workspace.",
+    "workspaceFiles": "Workspace files",
+    "tellYourAgent": "Tell your agent",
+    "cliComing": "CLI coming:",
+    "publishYourOwn": "Publish your own setup →",
+    "configuration": "Configuration"
+  },
+  "footer": {
+    "tagline": "The setup registry for OpenClaw agents.",
+    "builtWith": "Built with ❤️ by",
+    "github": "GitHub"
+  }
+}

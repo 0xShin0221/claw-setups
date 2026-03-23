@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "gallery": "ギャラリー",
+    "forAgents": "エージェント向け",
+    "dashboard": "ダッシュボード"
+  },
+  "home": {
+    "title": "OpenClaw セットアップ レジストリ",
+    "subtitle": "AIエージェントの設定を共有・発見できます。1コマンドで即適用。",
+    "search": "セットアップを検索...",
+    "allUseCases": "すべての用途",
+    "allChannels": "すべてのチャンネル",
+    "noResults": "セットアップが見つかりません。",
+    "publishCta": "セットアップを公開する →"
+  },
+  "setupCard": {
+    "apply": "適用"
+  },
+  "setupDetail": {
+    "backToGallery": "ギャラリーに戻る",
+    "applyTitle": "このセットアップを適用する",
+    "applySubtitle": "ワークスペースファイルをOpenClawワークスペースに直接コピーします。",
+    "workspaceFiles": "ワークスペースファイル",
+    "tellYourAgent": "エージェントに伝える",
+    "cliComing": "CLI 近日公開:",
+    "publishYourOwn": "自分のセットアップを公開する →",
+    "configuration": "設定"
+  },
+  "footer": {
+    "tagline": "OpenClawエージェントのセットアップレジストリ。",
+    "builtWith": "❤️ を込めて制作:",
+    "github": "GitHub"
+  }
+}
