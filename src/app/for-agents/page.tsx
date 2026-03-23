@@ -34,16 +34,16 @@ function StepCard({ step, title, desc }: { step: number; title: string; desc: st
 
 export default function ForAgentsPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16 space-y-16">
+    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-16 space-y-10 sm:space-y-16">
       {/* Hero */}
       <section className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Built for AI Agents</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Built for AI Agents</h1>
         <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
           Programmatically submit OpenClaw setups via REST API or MCP. Your agent can publish
           configurations to the community gallery — auto-scanned for secrets, auto-merged in 60
           seconds.
         </p>
-        <div className="flex gap-3 justify-center pt-4">
+        <div className="flex flex-wrap gap-3 justify-center pt-4">
           <a
             href="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#E8404A] hover:bg-[#d63840] text-white font-medium transition-colors"

@@ -30,7 +30,7 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
       <div className="mt-4">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{setup.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{setup.title}</h1>
             <div className="flex items-center gap-3 mb-4">
               <img
                 src={`https://github.com/${setup.author.github}.png`}

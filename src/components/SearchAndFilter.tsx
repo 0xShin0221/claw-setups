@@ -52,11 +52,11 @@ export default function SearchAndFilter({
         />
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
         <select
           value={channelFilter}
           onChange={(e) => onChannelChange(e.target.value)}
-          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50"
+          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto"
         >
           <option value="">All Channels</option>
           {CHANNELS.map((ch) => (
@@ -69,7 +69,7 @@ export default function SearchAndFilter({
         <select
           value={modelFilter}
           onChange={(e) => onModelChange(e.target.value)}
-          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50"
+          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto"
         >
           <option value="">All Models</option>
           {MODELS.map((m) => (
@@ -82,7 +82,7 @@ export default function SearchAndFilter({
         <select
           value={useCaseFilter}
           onChange={(e) => onUseCaseChange(e.target.value)}
-          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50"
+          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto"
         >
           <option value="">All Use Cases</option>
           {USE_CASES.map((uc) => (
@@ -98,7 +98,7 @@ export default function SearchAndFilter({
         <select
           value={sort}
           onChange={(e) => onSortChange(e.target.value)}
-          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 ml-auto"
+          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto sm:ml-auto"
         >
           <option value="likes">Most Liked</option>
           <option value="newest">Newest</option>
