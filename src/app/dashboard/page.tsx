@@ -65,19 +65,29 @@ export default function DashboardPage() {
     const res = await fetch("/api/dashboard/key-info");
     if (res.ok) {
       const data = await res.json();
-      if (data.twitterLinked && data.keyRecord && !data.keyRecord.xVerified) {
+
+      // Also check client-side identities (catches cases where server session lags)
+      let twitterLinked = data.twitterLinked;
+      if (!twitterLinked) {
+        const supabase = createClient();
+        if (supabase) {
+          const { data: { user } } = await supabase.auth.getUser();
+          twitterLinked = !!(user?.identities?.some((id) => id.provider === "twitter"));
+        }
+      }
+
+      if (twitterLinked && data.keyRecord && !data.keyRecord.xVerified) {
         const verifyRes = await fetch("/api/dashboard/verify-x", { method: "POST" });
         if (verifyRes.ok) {
           const freshRes = await fetch("/api/dashboard/key-info");
           if (freshRes.ok) {
-            const freshData = await freshRes.json();
-            setKeyInfo(freshData);
+            setKeyInfo(await freshRes.json());
             setLoading(false);
             return;
           }
         }
       }
-      setKeyInfo(data);
+      setKeyInfo({ ...data, twitterLinked });
     }
     setLoading(false);
   }
