@@ -139,7 +139,8 @@ export default function DashboardPage() {
     const { error } = await supabase.auth.linkIdentity({
       provider: "twitter",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        // Use client-side callback page to preserve PKCE verifier in browser
+        redirectTo: `${window.location.origin}/auth/x-callback`,
       },
     });
     if (error) {
