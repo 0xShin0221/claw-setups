@@ -12,7 +12,7 @@ export default function Home() {
         </h1>
         <p className="text-zinc-400">
           Discover and share real-world OpenClaw setups. Browse configurations
-          from the community, copy what works, and submit your own.
+          from the community, copy what works, and let your AI agent publish its own.
         </p>
       </div>
 
