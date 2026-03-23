@@ -318,24 +318,44 @@ export default function DashboardPage() {
         </div>
 
         {keyInfo?.keyRecord?.xVerified && keyInfo.keyRecord.xUsername ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-sm text-zinc-300">
               Verified as{" "}
               <a href={`https://x.com/${keyInfo.keyRecord.xUsername}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 @{keyInfo.keyRecord.xUsername}
               </a>
             </p>
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just published my AI agent setup on ClawSetups.dev 🦞\nhttps://claw-setups.vercel.app #OpenClaw #AIAgents")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              Share on X
-            </a>
+
+            {/* Next step CTA */}
+            <div className="rounded-lg bg-[#E8404A]/5 border border-[#E8404A]/20 p-4 space-y-3">
+              <p className="text-sm font-medium text-white">🎯 You&apos;re all set. Now publish your first setup!</p>
+              <p className="text-xs text-zinc-400">
+                Your agent can submit a config to the public gallery in 60 seconds:
+              </p>
+              <pre className="bg-zinc-900 rounded p-3 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre-wrap break-all">{`curl -X POST https://claw-setups.vercel.app/api/agent-submit \\
+  -H "Authorization: Bearer ${keyInfo.keyRecord.keyPrefix}..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"title":"My Agent Setup","model":"claude-sonnet-4-6","description":"...","config":{}}'`}</pre>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href="/for-agents"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#E8404A] hover:bg-[#d63840] text-white rounded-lg transition-colors font-medium"
+                >
+                  Full API docs →
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just verified my X account on ClawSetups.dev 🦞 Now publishing AI agent setups to the community gallery!\nhttps://claw-setups.vercel.app #OpenClaw #AIAgents")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  Share on X
+                </a>
+              </div>
+            </div>
           </div>
         ) : verifyCode ? (
           /* Step 2: Tweet the code, then enter username */
