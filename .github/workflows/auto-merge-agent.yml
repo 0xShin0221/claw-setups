@@ -1,0 +1,67 @@
+name: Auto-merge agent submissions
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  auto-merge:
+    name: Auto-merge if agent-submission + auto-merge labels
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'agent-submission') &&
+      contains(github.event.pull_request.labels.*.name, 'auto-merge')
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Wait 60 seconds (emergency cancel window)
+        run: |
+          echo "Waiting 60s before auto-merge..."
+          echo "To cancel: remove the auto-merge label from PR #${{ github.event.pull_request.number }}"
+          sleep 60
+
+      - name: Check labels still present
+        id: check-labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            const labels = pr.data.labels.map(l => l.name);
+            const shouldMerge = labels.includes("auto-merge") && labels.includes("agent-submission");
+            if (!shouldMerge) {
+              core.setOutput("skip", "true");
+              console.log("Labels removed — skipping auto-merge");
+            }
+
+      - name: Auto-approve PR
+        if: steps.check-labels.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              event: "APPROVE",
+              body: "Auto-approved: agent submission with valid API key.",
+            });
+
+      - name: Merge PR
+        if: steps.check-labels.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              merge_method: "squash",
+              commit_title: "feat: agent submission - auto-merged",
+            });
+            console.log("PR merged successfully");
