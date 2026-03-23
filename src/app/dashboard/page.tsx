@@ -126,12 +126,18 @@ export default function DashboardPage() {
     const supabase = createClient();
     if (!supabase) return;
     setLinking(true);
-    await supabase.auth.linkIdentity({
+    const { error } = await supabase.auth.linkIdentity({
       provider: "twitter",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       },
     });
+    if (error) {
+      console.error("Twitter link error:", error);
+      alert(`X連携エラー: ${error.message}`);
+      setLinking(false);
+    }
+    // No error = redirect to Twitter OAuth is happening
   }
 
   async function copyKey() {
