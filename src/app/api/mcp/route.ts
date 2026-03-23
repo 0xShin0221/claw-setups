@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://claw-setups.vercel.app";
+        const baseUrl = process.env.BASE_URL || "https://claw-setups.vercel.app";
         const resp = await fetch(`${baseUrl}/api/agent-submit`, {
           method: "POST",
           headers: {
