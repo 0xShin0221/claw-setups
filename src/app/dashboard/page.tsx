@@ -3,9 +3,26 @@
 import { useState, useEffect } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase-client";
 
+function SaveEnvCopy({ apiKey }: { apiKey: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        await navigator.clipboard.writeText(`export CLAWSETUPS_API_KEY="${apiKey}"`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      className="px-2 py-1.5 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded transition-colors whitespace-nowrap"
+    >
+      {copied ? "Copied!" : "Copy"}
+    </button>
+  );
+}
+
 function AgentInstructionCopy({ keyPrefix }: { keyPrefix: string }) {
   const [copied, setCopied] = useState(false);
-  const text = `Submit my OpenClaw setup to claw-setups.vercel.app.\nUse my API key: ${keyPrefix}...\nRead my SOUL.md and AGENTS.md to fill in the details.`;
+  void keyPrefix; // key is stored as env var, not passed in message
+  const text = `Submit my OpenClaw setup to claw-setups.vercel.app.\nUse the key saved as CLAWSETUPS_API_KEY in my workspace.\nRead my SOUL.md and AGENTS.md to fill in the details.`;
   return (
     <button
       onClick={async () => {
@@ -282,11 +299,12 @@ export default function DashboardPage() {
 
       {/* New key banner (shown only once) */}
       {newKey && (
-        <div className="rounded-lg border border-green-800 bg-green-950/50 p-4 space-y-3">
+        <div className="rounded-lg border border-green-800 bg-green-950/50 p-4 space-y-4">
           <div className="flex items-center gap-2 text-green-400 font-medium">
-            <span>&#x2705;</span>
-            <span>Your API key — save this now, it will not be shown again</span>
+            <span>✅</span>
+            <span>API key generated — save it now, shown only once</span>
           </div>
+          {/* Key copy */}
           <div className="flex items-center gap-2">
             <code className="flex-1 bg-zinc-900 rounded px-3 py-2 text-sm font-mono text-green-300 break-all">
               {newKey}
@@ -295,8 +313,21 @@ export default function DashboardPage() {
               onClick={copyKey}
               className="px-3 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded transition-colors whitespace-nowrap"
             >
-              {copied ? "Copied!" : "Copy"}
+              {copied ? "Copied!" : "Copy key"}
             </button>
+          </div>
+          {/* Save instruction */}
+          <div className="space-y-2">
+            <p className="text-xs text-green-600 font-medium uppercase tracking-wide">Save to your workspace (run in terminal)</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-zinc-950 rounded px-3 py-1.5 text-xs font-mono text-zinc-400 border border-zinc-800">
+                export CLAWSETUPS_API_KEY=&quot;{newKey}&quot;
+              </code>
+              <SaveEnvCopy apiKey={newKey} />
+            </div>
+            <p className="text-xs text-zinc-600">
+              Add this to your <code className="text-zinc-500">~/.zshrc</code> or <code className="text-zinc-500">~/.bashrc</code> to persist. Then your agent will find it automatically.
+            </p>
           </div>
         </div>
       )}
@@ -500,11 +531,11 @@ export default function DashboardPage() {
                 <p className="text-xs text-zinc-500">Just say this to Ace, Mia, or any OpenClaw agent:</p>
                 <div className="relative">
                   <pre className="bg-zinc-950 rounded-lg p-3 text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap break-words font-sans border border-zinc-800">{`Submit my OpenClaw setup to claw-setups.vercel.app.
-Use my API key: ${keyInfo.keyRecord?.keyPrefix}...
+Use the key saved as CLAWSETUPS_API_KEY in my workspace.
 Read my SOUL.md and AGENTS.md to fill in the details.`}</pre>
                   <AgentInstructionCopy keyPrefix={keyInfo.keyRecord?.keyPrefix ?? ""} />
                 </div>
-                <p className="text-xs text-zinc-600">Your agent will read your workspace files and publish in one shot.</p>
+                <p className="text-xs text-zinc-600">Save your key first (see below), then send this to your agent.</p>
               </div>
 
               {/* Divider */}
