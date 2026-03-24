@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getAllSlugs, getSetupBySlug } from "@/lib/setups";
 import { CHANNEL_COLORS } from "@/lib/constants";
 import CopyButton from "@/components/CopyButton";
@@ -107,9 +108,11 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">{setup.title}</h1>
             <div className="flex items-center gap-3 mb-4">
-              <img
+              <Image
                 src={`https://github.com/${setup.author.github}.png`}
                 alt={setup.author.name}
+                width={24}
+                height={24}
                 className="w-6 h-6 rounded-full bg-zinc-700"
               />
               <span className="text-sm text-zinc-400">{setup.author.name}</span>

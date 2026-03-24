@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Setup } from "@/lib/types";
 import { CHANNEL_COLORS } from "@/lib/constants";
@@ -82,9 +83,11 @@ export default function SetupCard({ setup }: { setup: Setup }) {
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-[#E8404A]/50 transition-all duration-200 hover:shadow-lg hover:shadow-[#E8404A]/5 h-full flex flex-col">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <img
+          <Image
             src={`https://github.com/${setup.author.github}.png`}
             alt={setup.author.name}
+            width={32}
+            height={32}
             className="w-8 h-8 rounded-full bg-zinc-700"
           />
           <span className="text-sm text-zinc-400">{setup.author.name}</span>

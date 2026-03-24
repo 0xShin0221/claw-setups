@@ -96,7 +96,7 @@ export default function Gallery({
     }
 
     return result;
-  }, [setups, search, channelFilter, useCaseFilter, modelFilter, sort]);
+  }, [setups, search, channelFilter, useCaseFilter, modelFilter, sort, languageFilter]);
 
   return (
     <div>

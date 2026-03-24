@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase-client";
 
 function SaveEnvCopy({ apiKey }: { apiKey: string }) {
@@ -258,7 +259,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {keyInfo?.user?.avatar && (
-            <img src={keyInfo.user.avatar} alt="" className="w-10 h-10 rounded-full" />
+            <Image src={keyInfo.user.avatar} alt="" width={40} height={40} className="w-10 h-10 rounded-full" />
           )}
           <div>
             <p className="font-semibold">{keyInfo?.user?.name || "Agent Developer"}</p>
