@@ -70,10 +70,6 @@ export default function DashboardPage() {
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState<string | null>(null);
   // Submit form
-  const [submitTitle, setSubmitTitle] = useState("");
-  const [submitDesc, setSubmitDesc] = useState("");
-  const [submitModel, setSubmitModel] = useState("anthropic/claude-sonnet-4-6");
-  const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ok: boolean; message: string; url?: string} | null>(null);
 
 
@@ -191,30 +187,7 @@ export default function DashboardPage() {
     setLinking(false);
   }
 
-  async function submitSetup() {
-    if (!submitTitle.trim() || !submitDesc.trim()) return;
-    setSubmitting(true);
-    setSubmitResult(null);
-    const res = await fetch("/api/dashboard/submit-setup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: submitTitle.trim(),
-        description: submitDesc.trim(),
-        model: submitModel,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok && data.ok) {
-      setSubmitResult({ ok: true, message: "Submitted! Your setup will appear in the gallery in ~60 seconds.", url: data.prUrl });
-      setSubmitTitle("");
-      setSubmitDesc("");
-      await fetchKeyInfo();
-    } else {
-      setSubmitResult({ ok: false, message: data.error || "Submission failed." });
-    }
-    setSubmitting(false);
-  }
+
 
   async function completeXVerify() {
     if (!verifyCode || !xHandleInput.trim()) return;
@@ -408,31 +381,19 @@ export default function DashboardPage() {
 
             {/* Next step CTA */}
             <div className="rounded-lg bg-[#E8404A]/5 border border-[#E8404A]/20 p-4 space-y-3">
-              <p className="text-sm font-medium text-white">🎯 You&apos;re all set. Now publish your first setup!</p>
+              <p className="text-sm font-medium text-white">🎯 Verified! Now publish your first setup.</p>
               <p className="text-xs text-zinc-400">
-                Your agent can submit a config to the public gallery in 60 seconds:
+                Tell your agent to submit your workspace to the gallery:
               </p>
-              <pre className="bg-zinc-900 rounded p-3 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre-wrap break-all">{`curl -X POST https://claw-setups.vercel.app/api/agent-submit \\
-  -H "Authorization: Bearer ${keyInfo.keyRecord.keyPrefix}..." \\
-  -H "Content-Type: application/json" \\
-  -d '{"title":"My Agent Setup","model":"claude-sonnet-4-6","description":"...","config":{}}'`}</pre>
+              <pre className="bg-zinc-900 rounded p-3 text-xs font-mono text-zinc-300 whitespace-pre-wrap break-words">{`Submit my OpenClaw setup to claw-setups.vercel.app.
+Use the key saved as CLAWSETUPS_API_KEY in my workspace.
+Read my SOUL.md and AGENTS.md to fill in the details.`}</pre>
               <div className="flex flex-wrap gap-2">
                 <a
                   href="/for-agents"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#E8404A] hover:bg-[#d63840] text-white rounded-lg transition-colors font-medium"
                 >
                   Full API docs →
-                </a>
-                <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just verified my X account on ClawSetups.dev 🦞 Now publishing AI agent setups to the community gallery!\nhttps://claw-setups.vercel.app #OpenClaw #AIAgents")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                  Share on X
                 </a>
               </div>
             </div>
@@ -535,50 +496,9 @@ Use the key saved as CLAWSETUPS_API_KEY in my workspace.
 Read my SOUL.md and AGENTS.md to fill in the details.`}</pre>
                   <AgentInstructionCopy keyPrefix={keyInfo.keyRecord?.keyPrefix ?? ""} />
                 </div>
-                <p className="text-xs text-zinc-600">Save your key first (see below), then send this to your agent.</p>
-              </div>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-xs text-zinc-600">or fill manually</span>
-                <div className="flex-1 h-px bg-zinc-800" />
-              </div>
-
-              {/* Manual form */}
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Setup title"
-                  value={submitTitle}
-                  onChange={(e) => setSubmitTitle(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#E8404A]/50"
-                />
-                <textarea
-                  placeholder="What does this setup do?"
-                  value={submitDesc}
-                  onChange={(e) => setSubmitDesc(e.target.value)}
-                  rows={2}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#E8404A]/50 resize-none"
-                />
-                <select
-                  value={submitModel}
-                  onChange={(e) => setSubmitModel(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50"
-                >
-                  <option value="anthropic/claude-sonnet-4-6">claude-sonnet-4-6</option>
-                  <option value="anthropic/claude-opus-4-5">claude-opus-4-5</option>
-                  <option value="anthropic/claude-haiku-3-5">claude-haiku-3-5</option>
-                  <option value="openai/gpt-4o">gpt-4o</option>
-                  <option value="openai/gpt-4o-mini">gpt-4o-mini</option>
-                </select>
-                <button
-                  onClick={submitSetup}
-                  disabled={submitting || !submitTitle.trim() || !submitDesc.trim()}
-                  className="w-full py-2.5 text-sm bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
-                  {submitting ? "Publishing..." : "Publish to Gallery"}
-                </button>
+                <p className="text-xs text-zinc-600">
+                  Make sure <code className="text-zinc-500">CLAWSETUPS_API_KEY</code> is set in your workspace, then send this to your agent.
+                </p>
               </div>
             </div>
           )}
