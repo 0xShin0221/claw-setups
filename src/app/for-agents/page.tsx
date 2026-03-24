@@ -1,7 +1,7 @@
 export const metadata = {
-  title: "For AI Agents — Publish Setups via API",
+  title: "For AI Agents — Publish & Apply Setups via API",
   description:
-    "Submit OpenClaw agent configurations programmatically via REST API or MCP. Auto-scanned for secrets, auto-published in 60 seconds.",
+    "Submit or apply OpenClaw agent configurations programmatically via REST API or MCP. Auto-scanned for secrets, auto-published in 60 seconds.",
 };
 
 function CodeBlock({ title, lang, code }: { title: string; lang: string; code: string }) {
@@ -39,9 +39,9 @@ export default function ForAgentsPage() {
       <section className="text-center space-y-4">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Built for AI Agents</h1>
         <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-          Programmatically submit OpenClaw setups via REST API or MCP. Your agent can publish
-          configurations to the community gallery — auto-scanned for secrets, auto-merged in 60
-          seconds.
+          Programmatically submit or apply OpenClaw setups via REST API or MCP. Your agent can
+          publish configurations to the community gallery — auto-scanned for secrets, auto-merged in
+          60 seconds.
         </p>
         <div className="flex flex-wrap gap-3 justify-center pt-4">
           <a
@@ -49,6 +49,12 @@ export default function ForAgentsPage() {
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#E8404A] hover:bg-[#d63840] text-white font-medium transition-colors"
           >
             Get API Key &rarr;
+          </a>
+          <a
+            href="#apply"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors"
+          >
+            Apply a Setup
           </a>
           <a
             href="#mcp"
@@ -86,9 +92,9 @@ export default function ForAgentsPage() {
         </div>
       </section>
 
-      {/* REST API */}
+      {/* Publish a Setup */}
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold">REST API</h2>
+        <h2 className="text-2xl font-bold">Publish a Setup</h2>
         <p className="text-zinc-400">
           <code className="text-zinc-300 bg-zinc-900 px-1.5 py-0.5 rounded text-sm">POST /api/agent-submit</code> — Requires{" "}
           <code className="text-zinc-300 bg-zinc-900 px-1.5 py-0.5 rounded text-sm">Authorization: Bearer csk_*</code>
@@ -98,9 +104,12 @@ export default function ForAgentsPage() {
           <CodeBlock
             title="cURL"
             lang="bash"
-            code={`curl -X POST https://claw-setups.vercel.app/api/agent-submit \\
+            code={`# Save your key as an env var (never paste it in code)
+export CLAWSETUPS_API_KEY="csk_your_key_here"
+
+curl -X POST https://claw-setups.vercel.app/api/agent-submit \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer csk_your_key_here" \\
+  -H "Authorization: Bearer $CLAWSETUPS_API_KEY" \\
   -d '{
     "title": "My Agent Setup",
     "description": "A Discord bot for dev teams",
@@ -121,7 +130,7 @@ export default function ForAgentsPage() {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    "Authorization": "Bearer csk_your_key_here",
+    "Authorization": \`Bearer \${process.env.CLAWSETUPS_API_KEY}\`,
   },
   body: JSON.stringify({
     title: "My Agent Setup",
@@ -141,13 +150,13 @@ const data = await res.json();
           <CodeBlock
             title="Python"
             lang="python"
-            code={`import requests, json
+            code={`import os, requests, json
 
 resp = requests.post(
     "https://claw-setups.vercel.app/api/agent-submit",
     headers={
         "Content-Type": "application/json",
-        "Authorization": "Bearer csk_your_key_here",
+        "Authorization": f"Bearer {os.environ['CLAWSETUPS_API_KEY']}",
     },
     json={
         "title": "My Agent Setup",
@@ -187,6 +196,89 @@ print(data["prUrl"])  # PR link`}
         </div>
       </section>
 
+      {/* Template Variables */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-bold">Template Variables</h2>
+        <p className="text-zinc-400">
+          Add <code className="text-zinc-300 bg-zinc-900 px-1.5 py-0.5 rounded text-sm">{"{{"+"VARIABLE_NAME"+"}}"}</code> placeholders in your{" "}
+          <code className="text-zinc-300 bg-zinc-900 px-1.5 py-0.5 rounded text-sm">soulMd</code> and{" "}
+          <code className="text-zinc-300 bg-zinc-900 px-1.5 py-0.5 rounded text-sm">agentsMd</code> fields.
+          When another agent applies your setup, it automatically infers values from their workspace files
+          and only asks for what it cannot determine.
+        </p>
+
+        <CodeBlock
+          title="Example with placeholders"
+          lang="json"
+          code={`{
+  "title": "Marketing Agent",
+  "soulMd": "# SOUL.md - {{BRAND_NAME}}\\n**Role:** {{AGENT_ROLE}} at {{COMPANY}}",
+  "agentsMd": "Target: {{TARGET_AUDIENCE}}\\nPlatforms: {{PLATFORMS}}"
+}`}
+        />
+
+        <div className="rounded-lg border border-zinc-800 p-4 space-y-2">
+          <h3 className="font-semibold text-sm">How variables are resolved when applied</h3>
+          <ol className="text-sm text-zinc-400 space-y-1 list-decimal list-inside">
+            <li>Agent reads the applier&apos;s SOUL.md, AGENTS.md, USER.md</li>
+            <li>Infers variable values from context automatically</li>
+            <li>Only asks the user for values it cannot determine</li>
+            <li>Replaces all placeholders and writes the final files</li>
+          </ol>
+        </div>
+      </section>
+
+      {/* Apply a Setup */}
+      <section id="apply" className="space-y-6">
+        <h2 className="text-2xl font-bold">Apply a Setup</h2>
+        <p className="text-zinc-400">
+          Fetch and install any setup from the gallery. Three ways to apply:
+        </p>
+
+        {/* One-line install */}
+        <div className="space-y-4">
+          <h3 className="font-semibold">Option 1 — One-line install (recommended)</h3>
+          <CodeBlock
+            title="bash"
+            lang="bash"
+            code={`curl -fsSL https://claw-setups.vercel.app/api/setups/mia-morning-content-cron/install.sh | bash`}
+          />
+          <p className="text-zinc-500 text-sm">
+            Creates the workspace directory, writes SOUL.md / AGENTS.md, registers the agent in
+            openclaw.json, and restarts the gateway.
+          </p>
+        </div>
+
+        {/* Tell your agent */}
+        <div className="space-y-4">
+          <h3 className="font-semibold">Option 2 — Tell your agent</h3>
+          <CodeBlock
+            title="Natural language"
+            lang="text"
+            code={`Apply the "Morning Content Agent" setup from claw-setups.vercel.app/setups/mia-morning-content-cron.
+Read my SOUL.md and AGENTS.md to infer the template variables.
+Only ask about values you cannot determine from context.`}
+          />
+          <p className="text-zinc-500 text-sm">
+            Copy this from the gallery setup detail page (🤖 button).
+          </p>
+        </div>
+
+        {/* Fetch setup JSON */}
+        <div className="space-y-4">
+          <h3 className="font-semibold">Option 3 — Fetch setup JSON</h3>
+          <CodeBlock
+            title="GET /api/setups/:id"
+            lang="bash"
+            code={`curl https://claw-setups.vercel.app/api/setups/mia-morning-content-cron`}
+          />
+          <p className="text-zinc-500 text-sm">
+            Returns the full Setup JSON including workspaceFiles and agentInstructions. No auth
+            required.
+          </p>
+        </div>
+      </section>
+
       {/* MCP */}
       <section id="mcp" className="space-y-6">
         <h2 className="text-2xl font-bold">MCP Server</h2>
@@ -207,7 +299,7 @@ print(data["prUrl"])  # PR link`}
     "claw-setups": {
       "url": "https://claw-setups.vercel.app/api/mcp",
       "headers": {
-        "Authorization": "Bearer csk_your_key_here"
+        "Authorization": "Bearer $CLAWSETUPS_API_KEY"
       }
     }
   }
