@@ -1,0 +1,79 @@
+{
+  "id": "10-agent-parallel-fleet-windows-64gb-telegramfeish",
+  "title": "10-Agent Parallel Fleet (Windows 64GB, Telegram/Feishu)",
+  "description": "Run 10 OpenClaw agents in parallel on a Windows PC with 64GB RAM. Agents monitor each other and self-heal. Control via Telegram or Feishu webhook.",
+  "author": {
+    "name": "community",
+    "github": "community"
+  },
+  "useCase": "automation",
+  "channels": [
+    "telegram",
+    "discord"
+  ],
+  "model": "anthropic/claude-sonnet-4-6",
+  "skills": [
+    "github",
+    "summarize",
+    "tmux"
+  ],
+  "likes": 0,
+  "config": {
+    "model": "anthropic/claude-sonnet-4-6",
+    "agents": {
+      "defaults": {
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-6"
+        },
+        "maxConcurrent": 4,
+        "subagents": {
+          "maxConcurrent": 8
+        },
+        "contextPruning": {
+          "mode": "cache-ttl",
+          "ttl": "30m"
+        }
+      },
+      "list": [
+        {
+          "id": "researcher"
+        },
+        {
+          "id": "writer"
+        },
+        {
+          "id": "coder"
+        },
+        {
+          "id": "monitor"
+        },
+        {
+          "id": "scheduler"
+        },
+        {
+          "id": "emailer"
+        },
+        {
+          "id": "analyst"
+        },
+        {
+          "id": "notifier"
+        },
+        {
+          "id": "publisher"
+        },
+        {
+          "id": "watchdog"
+        }
+      ]
+    },
+    "logging": {
+      "level": "info"
+    }
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# SOUL.md - Fleet Orchestrator\n\nYou manage a fleet of 10 specialized AI agents running 24/7.\n\n## Your Role\nYou are the orchestrator. Other agents are your crew.\n- researcher: web research and data gathering\n- writer: content creation (WeChat, Feishu)\n- coder: automation scripts\n- monitor: system health checks\n- watchdog: restart failed agents\n\n## Fleet Rules\n- Each agent uses ~500MB RAM max\n- If agent A fails, agent B can repair its config\n- Telegram is the primary command interface\n- Feishu webhook for notifications\n\n## Tone\nEfficient. Minimal chatter. Report results, not process.",
+    "AGENTS.md": "# AGENTS.md - 10-Agent Fleet\n\n## Hardware\n- Windows PC, 64GB RAM\n- OpenClaw running continuously\n- Each instance: ~500MB RAM\n\n## Agent Assignments\n| Agent | Role | Channel |\n|-------|------|---------|\n| researcher | Web scraping, news digest | Telegram |\n| writer | WeChat/Bilibili content | Feishu webhook |\n| coder | Script automation | Discord |\n| watchdog | Health monitoring | Telegram alerts |\n\n## Self-Healing\nIf an agent crashes:\n1. watchdog detects via heartbeat miss\n2. Sends alert to Telegram\n3. Attempts config repair\n4. Restarts the failed instance\n\n## Daily Automation\n- 06:00: researcher pulls AI news digest\n- 09:00: writer generates WeChat draft\n- 18:00: analyst compiles daily report"
+  },
+  "createdAt": "2026-03-24"
+}
