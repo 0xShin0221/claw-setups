@@ -18,7 +18,8 @@
     "sortNewest": "Más recientes",
     "sortTrending": "Tendencias",
     "noResults": "No se encontraron configuraciones.",
-    "noResultsHint": "Intenta ajustar tus filtros"
+    "noResultsHint": "Intenta ajustar tus filtros",
+    "allLanguages": "Todos los idiomas"
   },
   "setupCard": {
     "apply": "Aplicar"

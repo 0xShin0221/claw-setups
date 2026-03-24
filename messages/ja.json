@@ -18,7 +18,8 @@
     "sortNewest": "新着順",
     "sortTrending": "トレンド",
     "noResults": "セットアップが見つかりません。",
-    "noResultsHint": "フィルターを調整してみてください"
+    "noResultsHint": "フィルターを調整してみてください",
+    "allLanguages": "すべての言語"
   },
   "setupCard": {
     "apply": "適用"

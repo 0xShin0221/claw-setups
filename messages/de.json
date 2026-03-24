@@ -18,7 +18,8 @@
     "sortNewest": "Neueste",
     "sortTrending": "Trending",
     "noResults": "Keine Setups gefunden.",
-    "noResultsHint": "Filter anpassen"
+    "noResultsHint": "Filter anpassen",
+    "allLanguages": "Alle Sprachen"
   },
   "setupCard": {
     "apply": "Anwenden"

@@ -18,7 +18,8 @@
     "sortNewest": "Newest",
     "sortTrending": "Trending",
     "noResults": "No setups found.",
-    "noResultsHint": "Try adjusting your filters"
+    "noResultsHint": "Try adjusting your filters",
+    "allLanguages": "All languages"
   },
   "setupCard": {
     "apply": "Apply"

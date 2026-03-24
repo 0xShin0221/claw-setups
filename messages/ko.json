@@ -18,7 +18,8 @@
     "sortNewest": "최신순",
     "sortTrending": "트렌딩",
     "noResults": "설정을 찾을 수 없습니다.",
-    "noResultsHint": "필터를 조정해 보세요"
+    "noResultsHint": "필터를 조정해 보세요",
+    "allLanguages": "모든 언어"
   },
   "setupCard": {
     "apply": "적용"

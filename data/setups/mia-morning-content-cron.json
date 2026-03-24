@@ -1,0 +1,64 @@
+{
+  "id": "mia-morning-content-cron",
+  "title": "Morning Content Agent (Mia-style)",
+  "description": "A daily morning cron agent that auto-generates SNS content (TikTok / X / YouTube Shorts) with AI voiceover. Reads trends, writes scripts, produces video-ready slides, and posts — all before 9am.",
+  "author": {
+    "name": "0xShin0221",
+    "github": "0xShin0221"
+  },
+  "useCase": "marketing",
+  "channels": ["discord"],
+  "languages": ["ja", "en", "zh"],
+  "model": "anthropic/claude-sonnet-4-6",
+  "skills": ["discord", "notion", "video-frames", "gog"],
+  "likes": 5,
+  "config": {
+    "cron": "0 7 * * *",
+    "pipeline": ["trend-research", "script-generation", "tts", "video-render", "post"],
+    "tts": "elevenlabs",
+    "videoEngine": "kling-v2.6"
+  },
+  "variables": [
+    {
+      "name": "BRAND_NAME",
+      "description": "Your company or personal brand name",
+      "default": "infer from SOUL.md or USER.md",
+      "inferFrom": ["SOUL.md", "USER.md"]
+    },
+    {
+      "name": "TARGET_AUDIENCE",
+      "description": "Who is your content for? (e.g. 'Japanese SMEs', 'US fintech founders')",
+      "default": "infer from SOUL.md description",
+      "inferFrom": ["SOUL.md"]
+    },
+    {
+      "name": "CONTENT_TOPICS",
+      "description": "Main content pillars / topics to cover",
+      "default": "infer from SOUL.md content pillars or AGENTS.md",
+      "inferFrom": ["SOUL.md", "AGENTS.md"]
+    },
+    {
+      "name": "PLATFORMS",
+      "description": "SNS platforms to post to",
+      "default": "TikTok, X, YouTube Shorts",
+      "inferFrom": ["AGENTS.md"]
+    },
+    {
+      "name": "LANGUAGES",
+      "description": "Content languages (e.g. 'ja,en,zh')",
+      "default": "en",
+      "inferFrom": ["SOUL.md", "USER.md"]
+    },
+    {
+      "name": "POST_TIME",
+      "description": "What time should the morning cron run? (24h, your timezone)",
+      "default": "07:00"
+    }
+  ],
+  "agentInstructions": "1. Read the user's SOUL.md, AGENTS.md, and USER.md first. 2. Infer as many variables as possible from those files — do NOT ask for things you can already determine. 3. Only ask the user about variables you truly cannot infer (typically POST_TIME and PLATFORMS if not in their files). 4. Apply the setup by generating customized SOUL.md additions and a cron config file. 5. Report: what you set up, what values you used, and any manual steps the user must take (e.g. adding ElevenLabs API key).",
+  "workspaceFiles": {
+    "SOUL.md": "# SOUL.md - Mia\n\n**Name:** Mia（ミア）- Marketing AI\n**Role:** SNS運用・コンテンツ生成・エンゲージメント分析\n\n## Core Values\n- Empathy drives virality\n- Consistency builds the brand\n- Speed is everything\n\n## Content Pillars\n- Cost-saving stories\n- 'AI can do THIS?' demos\n- Before/after comparisons",
+    "AGENTS.md": "# AGENTS.md - Morning Content Cron\n\n## Role\nRun daily at 07:00. Generate SNS content for {{PLATFORMS}} in {{LANGUAGES}}.\nFocus on {{CONTENT_TOPICS}} targeting {{TARGET_AUDIENCE}}.\n\n## Pipeline\n1. Fetch trending topics\n2. Write 5-slide script ({{BRAND_NAME}} voice)\n3. Generate TTS audio\n4. Render video\n5. Post to {{PLATFORMS}}"
+  },
+  "createdAt": "2026-03-24"
+}

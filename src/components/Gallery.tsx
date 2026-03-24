@@ -7,10 +7,12 @@ import SearchAndFilter from "./SearchAndFilter";
 
 interface GalleryProps {
   setups: Setup[];
+  initialLocale?: string;
   searchPlaceholder?: string;
   allUseCases?: string;
   allChannels?: string;
   allModels?: string;
+  allLanguages?: string;
   sortLikes?: string;
   sortNewest?: string;
   sortTrending?: string;
@@ -20,10 +22,12 @@ interface GalleryProps {
 
 export default function Gallery({
   setups,
+  initialLocale = "en",
   searchPlaceholder = "Search setups...",
   allUseCases = "All use cases",
   allChannels = "All channels",
   allModels = "All models",
+  allLanguages = "All languages",
   sortLikes = "Most liked",
   sortNewest = "Newest",
   sortTrending = "Trending",
@@ -34,6 +38,10 @@ export default function Gallery({
   const [channelFilter, setChannelFilter] = useState("");
   const [useCaseFilter, setUseCaseFilter] = useState("");
   const [modelFilter, setModelFilter] = useState("");
+  // Auto-apply locale as language filter (non-English locales)
+  const [languageFilter, setLanguageFilter] = useState(
+    initialLocale !== "en" ? initialLocale : ""
+  );
   const [sort, setSort] = useState("likes");
 
   const filtered = useMemo(() => {
@@ -60,6 +68,12 @@ export default function Gallery({
 
     if (modelFilter) {
       result = result.filter((s) => s.model === modelFilter);
+    }
+
+    if (languageFilter) {
+      result = result.filter((s) =>
+        !s.languages || s.languages.length === 0 || s.languages.includes(languageFilter)
+      );
     }
 
     if (sort === "likes") {
@@ -95,12 +109,15 @@ export default function Gallery({
         onUseCaseChange={setUseCaseFilter}
         modelFilter={modelFilter}
         onModelChange={setModelFilter}
+        languageFilter={languageFilter}
+        onLanguageChange={setLanguageFilter}
         sort={sort}
         onSortChange={setSort}
         searchPlaceholder={searchPlaceholder}
         allUseCases={allUseCases}
         allChannels={allChannels}
         allModels={allModels}
+        allLanguages={allLanguages}
         sortLikes={sortLikes}
         sortNewest={sortNewest}
         sortTrending={sortTrending}

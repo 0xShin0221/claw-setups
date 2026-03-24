@@ -18,7 +18,8 @@
     "sortNewest": "最新",
     "sortTrending": "热门",
     "noResults": "未找到配置。",
-    "noResultsHint": "尝试调整筛选条件"
+    "noResultsHint": "尝试调整筛选条件",
+    "allLanguages": "所有语言"
   },
   "setupCard": {
     "apply": "应用"

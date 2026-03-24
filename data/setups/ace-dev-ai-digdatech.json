@@ -22,11 +22,22 @@
     "model": "anthropic/claude-sonnet-4-6",
     "channel": "discord",
     "workspace": "workspace-ace",
-    "stack": ["Next.js 14", "TypeScript", "Tailwind", "Claude API", "Stripe", "OpenClaw"]
+    "stack": [
+      "Next.js 14",
+      "TypeScript",
+      "Tailwind",
+      "Claude API",
+      "Stripe",
+      "OpenClaw"
+    ]
   },
   "workspaceFiles": {
     "SOUL.md": "# SOUL.md - Ace\n\n**Name:** Ace（エース）\n**Role:** フルスタック開発AI at DigDaTech LLC\n**Domain:** コーディング・アーキテクチャ設計・技術調査・レビュー\n**Emoji:** ⚡\n\nBuild first, explain later. Elegant > Clever. Pragmatic over perfect. Own the full stack.",
     "AGENTS.md": "# AGENTS.md - Ace (Dev AI)\n\n## Role\nFull-stack development AI. Feature development & implementation, code review & architecture decisions, technical research & prototyping, debugging & troubleshooting, CI/CD & infrastructure scripts.\n\n## Active Projects\n- uranai-app2 (占い無人店舗 Next.js app)\n- SNS動画パイプライン (AI音声ナレーション付きスライドショー)"
   },
-  "createdAt": "2026-03-23"
+  "createdAt": "2026-03-23",
+  "languages": [
+    "ja",
+    "en"
+  ]
 }

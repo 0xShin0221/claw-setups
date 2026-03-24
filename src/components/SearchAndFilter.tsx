@@ -2,6 +2,17 @@
 
 import { CHANNELS, USE_CASES, MODELS } from "@/lib/constants";
 
+const LANGUAGE_OPTIONS = [
+  { code: "en", label: "🇺🇸 EN" },
+  { code: "ja", label: "🇯🇵 JA" },
+  { code: "zh", label: "🇨🇳 ZH" },
+  { code: "ko", label: "🇰🇷 KO" },
+  { code: "de", label: "🇩🇪 DE" },
+  { code: "fr", label: "🇫🇷 FR" },
+  { code: "es", label: "🇪🇸 ES" },
+  { code: "pt", label: "🇧🇷 PT" },
+];
+
 interface Props {
   search: string;
   onSearchChange: (v: string) => void;
@@ -11,12 +22,15 @@ interface Props {
   onUseCaseChange: (v: string) => void;
   modelFilter: string;
   onModelChange: (v: string) => void;
+  languageFilter: string;
+  onLanguageChange: (v: string) => void;
   sort: string;
   onSortChange: (v: string) => void;
   searchPlaceholder?: string;
   allUseCases?: string;
   allChannels?: string;
   allModels?: string;
+  allLanguages?: string;
   sortLikes?: string;
   sortNewest?: string;
   sortTrending?: string;
@@ -31,12 +45,15 @@ export default function SearchAndFilter({
   onUseCaseChange,
   modelFilter,
   onModelChange,
+  languageFilter,
+  onLanguageChange,
   sort,
   onSortChange,
   searchPlaceholder = "Search setups...",
   allUseCases = "All use cases",
   allChannels = "All channels",
   allModels = "All models",
+  allLanguages = "All languages",
   sortLikes = "Most liked",
   sortNewest = "Newest",
   sortTrending = "Trending",
@@ -106,6 +123,17 @@ export default function SearchAndFilter({
                 .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
                 .join(" ")}
             </option>
+          ))}
+        </select>
+
+        <select
+          value={languageFilter}
+          onChange={(e) => onLanguageChange(e.target.value)}
+          className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-[#E8404A]/50 w-full sm:w-auto"
+        >
+          <option value="">{allLanguages}</option>
+          {LANGUAGE_OPTIONS.map((l) => (
+            <option key={l.code} value={l.code}>{l.label}</option>
           ))}
         </select>
 

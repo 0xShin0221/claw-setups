@@ -1,12 +1,22 @@
 {
   "id": "discord-dev-team",
   "title": "Discord Dev Team",
-  "author": { "name": "sarahcodes", "github": "sarahcodes" },
+  "author": {
+    "name": "sarahcodes",
+    "github": "sarahcodes"
+  },
   "description": "Multi-agent setup for a dev team Discord server. Main agent handles general questions, coding agent reviews PRs and helps debug. GitHub skill for repo integration.",
   "useCase": "developer-tools",
-  "channels": ["discord"],
+  "channels": [
+    "discord"
+  ],
   "model": "anthropic/claude-sonnet-4",
-  "skills": ["github", "code_review", "web_search", "jira"],
+  "skills": [
+    "github",
+    "code_review",
+    "web_search",
+    "jira"
+  ],
   "likes": 342,
   "createdAt": "2026-01-20",
   "config": {
@@ -23,20 +33,33 @@
       {
         "name": "main",
         "model": "anthropic/claude-sonnet-4",
-        "skills": ["web_search", "jira"],
+        "skills": [
+          "web_search",
+          "jira"
+        ],
         "system_prompt": "You are a dev team assistant. Help with general questions, documentation lookups, and team coordination."
       },
       {
         "name": "coder",
         "model": "anthropic/claude-sonnet-4",
-        "skills": ["github", "code_review"],
+        "skills": [
+          "github",
+          "code_review"
+        ],
         "system_prompt": "You are a senior code reviewer. Review PRs, help debug issues, and suggest improvements. Always explain your reasoning.",
-        "triggers": ["!review", "!debug", "!code"]
+        "triggers": [
+          "!review",
+          "!debug",
+          "!code"
+        ]
       }
     ]
   },
   "workspaceFiles": {
     "SOUL.md": "# Dev Team Assistant\n\nYou serve a software development team. Be technical, precise, and reference documentation when possible. Use code blocks for any code snippets.",
     "AGENTS.md": "# Agent Routing\n\n- **main**: General questions, docs, coordination\n- **coder**: Triggered by !review, !debug, !code — handles all code-related tasks"
-  }
+  },
+  "languages": [
+    "en"
+  ]
 }

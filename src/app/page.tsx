@@ -46,6 +46,7 @@ export default function Home() {
 
       <Gallery
         setups={setups}
+        initialLocale={locale}
         searchPlaceholder={t("home.search")}
         allUseCases={t("home.allUseCases")}
         allChannels={t("home.allChannels")}
