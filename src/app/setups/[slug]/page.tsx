@@ -272,9 +272,9 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
             <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">One-line install</p>
             <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-3 py-2.5">
               <code className="flex-1 text-xs font-mono text-zinc-300 break-all">
-                curl -fsSL https://claw-setups.vercel.app/api/setups/{setup.id}/install.sh | bash
+                curl -fsSL https://claw-setups.vercel.app/api/setups/{setup.id}/install | bash
               </code>
-              <CopyButton text={`curl -fsSL https://claw-setups.vercel.app/api/setups/${setup.id}/install.sh | bash`} tiny />
+              <CopyButton text={`curl -fsSL https://claw-setups.vercel.app/api/setups/${setup.id}/install | bash`} tiny />
             </div>
             <p className="text-xs text-zinc-600">Creates workspace, registers agent, restarts gateway automatically.</p>
           </div>

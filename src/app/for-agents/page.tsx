@@ -241,7 +241,7 @@ print(data["prUrl"])  # PR link`}
           <CodeBlock
             title="bash"
             lang="bash"
-            code={`curl -fsSL https://claw-setups.vercel.app/api/setups/mia-morning-content-cron/install.sh | bash`}
+            code={`curl -fsSL https://claw-setups.vercel.app/api/setups/mia-morning-content-cron/install | bash`}
           />
           <p className="text-zinc-500 text-sm">
             Creates the workspace directory, writes SOUL.md / AGENTS.md, registers the agent in

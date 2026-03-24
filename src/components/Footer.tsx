@@ -62,7 +62,7 @@ export default function Footer() {
             </svg>
           </a>
           <a
-            href="https://twitter.com/openclaw"
+            href="https://x.com/0xShin0221"
             target="_blank"
             rel="noopener noreferrer"
             className="text-zinc-500 hover:text-white transition-colors"
