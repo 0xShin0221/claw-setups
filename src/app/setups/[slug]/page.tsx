@@ -7,6 +7,7 @@ import CopyButton from "@/components/CopyButton";
 import CopyAgentInstruction from "@/components/CopyAgentInstruction";
 import { getLocale, getTranslations } from "@/lib/i18n";
 import { DEFAULT_AGENT_INSTRUCTIONS } from "@/lib/types";
+import ViewTracker from "@/components/ViewTracker";
 
 // Extract {{PLACEHOLDER}} tokens from all workspace file contents
 function extractPlaceholders(workspaceFiles?: Record<string, string>): string[] {
@@ -120,11 +121,14 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
               <span className="text-sm text-zinc-500">{setup.createdAt}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-zinc-400">
-            <svg className="w-5 h-5 text-[#E8404A]" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-            </svg>
-            <span className="font-medium">{setup.likes}</span>
+          <div className="flex items-center gap-3 text-zinc-400">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-[#E8404A]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+              </svg>
+              <span className="font-medium">{setup.likes}</span>
+            </div>
+            <ViewTracker setupId={setup.id} />
           </div>
         </div>
 
