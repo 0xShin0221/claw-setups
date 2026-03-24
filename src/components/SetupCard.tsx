@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Setup } from "@/lib/types";
 import { CHANNEL_COLORS } from "@/lib/constants";
 
@@ -19,7 +19,46 @@ function buildAgentPrompt(setup: Setup): string {
 
 export default function SetupCard({ setup }: { setup: Setup }) {
   const [copied, setCopied] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(setup.likes ?? 0);
+  const [liking, setLiking] = useState(false);
   const modelShort = setup.model.split("/").pop() || setup.model;
+
+  // Fetch like state on mount
+  useEffect(() => {
+    fetch(`/api/setups/${setup.id}/like`)
+      .then((r) => r.json())
+      .then((d) => {
+        setLikeCount(d.count);
+        setLiked(d.liked);
+      })
+      .catch(() => {});
+  }, [setup.id]);
+
+  async function handleLike(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (liking) return;
+    setLiking(true);
+    // Optimistic update
+    setLiked((prev) => !prev);
+    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+    try {
+      const res = await fetch(`/api/setups/${setup.id}/like`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setLiked(data.liked);
+        setLikeCount(data.count);
+      }
+    } catch {
+      // Revert optimistic update on error
+      setLiked((prev) => !prev);
+      setLikeCount((prev) => (liked ? prev + 1 : prev - 1));
+    }
+    setLiking(false);
+  }
 
   async function handleCopy(e: React.MouseEvent) {
     e.preventDefault();
@@ -50,12 +89,25 @@ export default function SetupCard({ setup }: { setup: Setup }) {
           />
           <span className="text-sm text-zinc-400">{setup.author.name}</span>
         </div>
-        <div className="flex items-center gap-1 text-zinc-500 text-sm">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <button
+          onClick={handleLike}
+          disabled={liking}
+          className={`flex items-center gap-1 text-sm transition-colors ${
+            liked ? "text-[#E8404A]" : "text-zinc-500 hover:text-[#E8404A]"
+          }`}
+          title={liked ? "Unlike" : "Like"}
+        >
+          <svg
+            className="w-4 h-4 transition-transform active:scale-125"
+            fill={liked ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth={liked ? 0 : 2}
+            viewBox="0 0 20 20"
+          >
             <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
           </svg>
-          {setup.likes ?? 0}
-        </div>
+          {likeCount}
+        </button>
       </div>
 
       <Link href={`/setups/${setup.id}`} className="block group flex-grow">
