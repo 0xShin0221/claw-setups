@@ -13,52 +13,15 @@
   "skills": ["discord", "notion", "video-frames", "gog"],
   "likes": 5,
   "config": {
-    "cron": "0 7 * * *",
+    "cron": "0 {{POST_HOUR}} * * *",
     "pipeline": ["trend-research", "script-generation", "tts", "video-render", "post"],
     "tts": "elevenlabs",
     "videoEngine": "kling-v2.6"
   },
-  "variables": [
-    {
-      "name": "BRAND_NAME",
-      "description": "Your company or personal brand name",
-      "default": "infer from SOUL.md or USER.md",
-      "inferFrom": ["SOUL.md", "USER.md"]
-    },
-    {
-      "name": "TARGET_AUDIENCE",
-      "description": "Who is your content for? (e.g. 'Japanese SMEs', 'US fintech founders')",
-      "default": "infer from SOUL.md description",
-      "inferFrom": ["SOUL.md"]
-    },
-    {
-      "name": "CONTENT_TOPICS",
-      "description": "Main content pillars / topics to cover",
-      "default": "infer from SOUL.md content pillars or AGENTS.md",
-      "inferFrom": ["SOUL.md", "AGENTS.md"]
-    },
-    {
-      "name": "PLATFORMS",
-      "description": "SNS platforms to post to",
-      "default": "TikTok, X, YouTube Shorts",
-      "inferFrom": ["AGENTS.md"]
-    },
-    {
-      "name": "LANGUAGES",
-      "description": "Content languages (e.g. 'ja,en,zh')",
-      "default": "en",
-      "inferFrom": ["SOUL.md", "USER.md"]
-    },
-    {
-      "name": "POST_TIME",
-      "description": "What time should the morning cron run? (24h, your timezone)",
-      "default": "07:00"
-    }
-  ],
-  "agentInstructions": "1. Read the user's SOUL.md, AGENTS.md, and USER.md first. 2. Infer as many variables as possible from those files — do NOT ask for things you can already determine. 3. Only ask the user about variables you truly cannot infer (typically POST_TIME and PLATFORMS if not in their files). 4. Apply the setup by generating customized SOUL.md additions and a cron config file. 5. Report: what you set up, what values you used, and any manual steps the user must take (e.g. adding ElevenLabs API key).",
+  "agentInstructions": "To apply this setup: 1. Read the user's SOUL.md, AGENTS.md, and USER.md. 2. Infer all {{PLACEHOLDER}} values from context — especially BRAND_NAME, TARGET_AUDIENCE, CONTENT_TOPICS, and LANGUAGES. 3. Only ask about POST_HOUR and PLATFORMS if not found in workspace files. 4. Write the final SOUL.md and AGENTS.md to the workspace. 5. Report what was set up, what values were used, and remind the user to set ELEVENLABS_API_KEY and REPLICATE_API_KEY if not already configured.",
   "workspaceFiles": {
-    "SOUL.md": "# SOUL.md - Mia\n\n**Name:** Mia（ミア）- Marketing AI\n**Role:** SNS運用・コンテンツ生成・エンゲージメント分析\n\n## Core Values\n- Empathy drives virality\n- Consistency builds the brand\n- Speed is everything\n\n## Content Pillars\n- Cost-saving stories\n- 'AI can do THIS?' demos\n- Before/after comparisons",
-    "AGENTS.md": "# AGENTS.md - Morning Content Cron\n\n## Role\nRun daily at 07:00. Generate SNS content for {{PLATFORMS}} in {{LANGUAGES}}.\nFocus on {{CONTENT_TOPICS}} targeting {{TARGET_AUDIENCE}}.\n\n## Pipeline\n1. Fetch trending topics\n2. Write 5-slide script ({{BRAND_NAME}} voice)\n3. Generate TTS audio\n4. Render video\n5. Post to {{PLATFORMS}}"
+    "SOUL.md": "# SOUL.md - {{BRAND_NAME}} Marketing AI\n\n**Name:** {{AGENT_NAME}}\n**Role:** SNS Content Agent for {{BRAND_NAME}}\n**Target:** {{TARGET_AUDIENCE}}\n\n## Core Values\n- Empathy drives virality\n- Consistency builds the brand\n- Speed is everything\n\n## Content Pillars\n{{CONTENT_TOPICS}}\n\n## Platforms\n{{PLATFORMS}}",
+    "AGENTS.md": "# AGENTS.md - Morning Content Cron\n\n## Schedule\nRun daily at {{POST_HOUR}}:00 ({{TIMEZONE}}).\n\n## Pipeline\n1. Fetch trending topics relevant to {{TARGET_AUDIENCE}}\n2. Write 5-slide script in {{BRAND_NAME}} voice\n3. Generate TTS audio in {{LANGUAGES}}\n4. Render video (Kling v2.6)\n5. Post to {{PLATFORMS}}\n\n## Required env vars\n- ELEVENLABS_API_KEY\n- REPLICATE_API_KEY\n- DISCORD_WEBHOOK (for status reports)"
   },
   "createdAt": "2026-03-24"
 }

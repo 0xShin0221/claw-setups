@@ -3,13 +3,6 @@ export interface SetupAuthor {
   github: string;
 }
 
-export interface SetupVariable {
-  name: string;          // e.g. "TARGET_MARKET"
-  description: string;   // shown to user / agent
-  default?: string;      // agent uses this if it can infer nothing
-  inferFrom?: string[];  // workspace fields agent should read first, e.g. ["USER.md", "SOUL.md"]
-}
-
 export interface Setup {
   id: string;
   title: string;
@@ -23,7 +16,15 @@ export interface Setup {
   likes: number;
   createdAt: string;
   config: Record<string, unknown>;
-  workspaceFiles?: Record<string, string>;
-  variables?: SetupVariable[];    // template variables for customization
-  agentInstructions?: string;     // how the applying agent should behave
+  workspaceFiles?: Record<string, string>;  // may contain {{PLACEHOLDER}} tokens
+  agentInstructions?: string;  // how the applying agent should handle this setup
 }
+
+// Standard agent instructions template (used when agentInstructions is not set)
+export const DEFAULT_AGENT_INSTRUCTIONS = `To apply this setup:
+1. Read the user's existing workspace files (SOUL.md, AGENTS.md, USER.md).
+2. Identify all {{PLACEHOLDER}} tokens in the workspace files below.
+3. Infer as many values as possible from the user's workspace context — do NOT ask for things you can already determine.
+4. Only ask the user about values you cannot infer.
+5. Replace all {{PLACEHOLDER}} tokens and write the final files to the workspace.
+6. Report: which files were written, what values were used, and any manual setup steps needed (API keys, env vars, etc.).`;

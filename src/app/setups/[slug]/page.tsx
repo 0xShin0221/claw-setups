@@ -4,6 +4,21 @@ import { getAllSlugs, getSetupBySlug } from "@/lib/setups";
 import { CHANNEL_COLORS } from "@/lib/constants";
 import CopyButton from "@/components/CopyButton";
 import { getLocale, getTranslations } from "@/lib/i18n";
+import { DEFAULT_AGENT_INSTRUCTIONS } from "@/lib/types";
+
+// Extract {{PLACEHOLDER}} tokens from all workspace file contents
+function extractPlaceholders(workspaceFiles?: Record<string, string>): string[] {
+  if (!workspaceFiles) return [];
+  const all = Object.values(workspaceFiles).join("\n");
+  const matches = all.match(/\{\{([A-Z_]+)\}\}/g) || [];
+  const unique: string[] = [];
+  const seen = new Set<string>();
+  for (const m of matches) {
+    const name = m.replace(/\{\{|\}\}/g, "");
+    if (!seen.has(name)) { seen.add(name); unique.push(name); }
+  }
+  return unique;
+}
 
 const BASE_URL = process.env.BASE_URL || "https://claw-setups.vercel.app";
 
@@ -44,6 +59,14 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
 
   const modelShort = setup.model.split("/").pop() || setup.model;
   const configJson = JSON.stringify(setup.config, null, 2);
+
+  const placeholders = extractPlaceholders(setup.workspaceFiles);
+  const agentInstructions = setup.agentInstructions || DEFAULT_AGENT_INSTRUCTIONS;
+
+  // Build "Tell your agent" instruction
+  const agentPrompt = placeholders.length > 0
+    ? `Apply the "${setup.title}" setup from claw-setups.vercel.app/setups/${setup.id}.\nRead my SOUL.md, AGENTS.md, and USER.md to infer the template variables.\nOnly ask about values you cannot determine from context.`
+    : `Apply the "${setup.title}" setup from claw-setups.vercel.app/setups/${setup.id}.\nRead my SOUL.md and AGENTS.md to fill in the details.`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -204,16 +227,45 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
             </div>
           )}
 
+          {/* Template Variables */}
+          {placeholders.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">
+                Template variables <span className="text-zinc-700 normal-case font-normal">— auto-filled from your workspace</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {placeholders.map((p) => (
+                  <span key={p} className="text-xs font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-[#E8404A]">
+                    {`{{${p}}}`}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-600">
+                Your agent reads <code className="text-zinc-500">SOUL.md</code> / <code className="text-zinc-500">AGENTS.md</code> / <code className="text-zinc-500">USER.md</code> and infers these automatically. Only asks for what it cannot determine.
+              </p>
+            </div>
+          )}
+
           {/* Tell your agent */}
           <div className="space-y-2">
             <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">{t("setupDetail.tellYourAgent")}</p>
-            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-3 py-2.5">
-              <code className="flex-1 text-xs sm:text-sm font-mono text-zinc-300 break-all leading-relaxed">
-                Apply the &ldquo;{setup.title}&rdquo; setup from claw-setups.vercel.app/setups/{setup.id}
+            <div className="flex items-start gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-3 py-2.5">
+              <code className="flex-1 text-xs sm:text-sm font-mono text-zinc-300 break-words leading-relaxed whitespace-pre-wrap">
+                {agentPrompt}
               </code>
-              <CopyButton text={`Apply the "${setup.title}" setup from claw-setups.vercel.app/setups/${setup.id}`} tiny />
+              <CopyButton text={agentPrompt} tiny />
             </div>
           </div>
+
+          {/* Agent instructions (collapsed) */}
+          <details>
+            <summary className="text-xs text-zinc-600 hover:text-zinc-400 cursor-pointer select-none">
+              View agent instructions ↓
+            </summary>
+            <pre className="mt-2 text-xs text-zinc-500 bg-zinc-950 rounded-lg p-3 border border-zinc-800 whitespace-pre-wrap leading-relaxed">
+              {agentInstructions}
+            </pre>
+          </details>
 
           {/* Future CLI */}
           <div className="flex items-center gap-2 text-xs text-zinc-600">
