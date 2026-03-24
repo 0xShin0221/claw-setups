@@ -133,6 +133,19 @@ export default function Gallery({
         <div className="text-center py-16 text-zinc-500">
           <p className="text-lg">{noResults}</p>
           <p className="text-sm mt-1">{noResultsHint}</p>
+          <button
+            onClick={() => {
+              setSearch("");
+              setChannelFilter("");
+              setUseCaseFilter("");
+              setModelFilter("");
+              setLanguageFilter("");
+              setSort("likes");
+            }}
+            className="mt-4 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors"
+          >
+            Clear all filters
+          </button>
         </div>
       )}
     </div>

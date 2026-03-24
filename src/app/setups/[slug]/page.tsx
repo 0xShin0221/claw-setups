@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAllSlugs, getSetupBySlug } from "@/lib/setups";
 import { CHANNEL_COLORS } from "@/lib/constants";
 import CopyButton from "@/components/CopyButton";
+import CopyAgentInstruction from "@/components/CopyAgentInstruction";
 import { getLocale, getTranslations } from "@/lib/i18n";
 import { DEFAULT_AGENT_INSTRUCTIONS } from "@/lib/types";
 
@@ -246,14 +247,13 @@ export default function SetupDetail({ params }: { params: { slug: string } }) {
             </div>
           )}
 
-          {/* Tell your agent */}
-          <div className="space-y-2">
-            <p className="text-xs text-zinc-500 uppercase tracking-wide font-medium">{t("setupDetail.tellYourAgent")}</p>
-            <div className="flex items-start gap-2 bg-zinc-900 rounded-lg border border-zinc-800 px-3 py-2.5">
-              <code className="flex-1 text-xs sm:text-sm font-mono text-zinc-300 break-words leading-relaxed whitespace-pre-wrap">
+          {/* Tell your agent — primary CTA */}
+          <div className="space-y-3">
+            <CopyAgentInstruction text={agentPrompt} />
+            <div className="bg-zinc-900 rounded-lg border border-zinc-800 px-3 py-2.5">
+              <code className="text-xs sm:text-sm font-mono text-zinc-500 break-words leading-relaxed whitespace-pre-wrap">
                 {agentPrompt}
               </code>
-              <CopyButton text={agentPrompt} tiny />
             </div>
           </div>
 
