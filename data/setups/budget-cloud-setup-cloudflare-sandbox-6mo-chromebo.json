@@ -1,0 +1,51 @@
+{
+  "id": "budget-cloud-setup-cloudflare-sandbox-6mo-chromebo",
+  "title": "Budget Cloud Setup — Cloudflare Sandbox ($6/mo, Chromebook-friendly)",
+  "description": "Deploy OpenClaw on a $6/month Cloudflare sandbox. Works from any device including Chromebook. ChatGPT subscription covers model costs — no extra API fees needed.",
+  "author": {
+    "name": "community",
+    "github": "community"
+  },
+  "useCase": "personal",
+  "channels": [
+    "telegram",
+    "discord"
+  ],
+  "model": "openai/gpt-4o",
+  "skills": [
+    "github",
+    "web-browsing"
+  ],
+  "likes": 0,
+  "config": {
+    "model": "openai/gpt-4o",
+    "auth": {
+      "profiles": {
+        "openai:default": {
+          "provider": "openai",
+          "mode": "oauth"
+        }
+      }
+    },
+    "channel": "telegram",
+    "logging": {
+      "level": "info"
+    },
+    "agents": {
+      "defaults": {
+        "model": {
+          "primary": "openai/gpt-4o"
+        },
+        "contextPruning": {
+          "mode": "cache-ttl",
+          "ttl": "2h"
+        }
+      }
+    }
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# SOUL.md - Budget Cloud AI Assistant\n\nYou run on a Cloudflare sandbox for $6/month. Accessible from any device.\n\n## Setup Philosophy\n- Keep it cheap and accessible\n- ChatGPT Pro subscription covers LLM costs (OAuth token)\n- No dedicated hardware required\n- Works from Chromebook, phone, any device\n\n## Personality\nHelpful, practical, no-nonsense. You know resources are limited, so you prioritize high-value tasks.\n\n## Key Constraint\nAll compute is on Cloudflare Workers — avoid memory-heavy tasks.",
+    "AGENTS.md": "# AGENTS.md - Budget Cloud Setup\n\n## Infrastructure\n- Hosting: Cloudflare Sandbox (~$6 USD/month)\n- Model: OpenAI via OAuth (ChatGPT Pro subscription)\n- Access: Any device via Telegram\n\n## Getting Started\n1. Sign up for Cloudflare Workers ($5/month plan)\n2. Deploy OpenClaw to Workers\n3. Connect Telegram bot\n4. Log in with ChatGPT Pro OAuth (no API key needed!)\n\n## Tips\n- Install ollama locally for free local fallback\n- ChromeBook users: use Telegram web for full access\n- Use clawhub install web-browsing as first skill\n\n## Cost Breakdown\n| Item | Monthly Cost |\n|------|--------------|\n| Cloudflare Workers | $6 |\n| ChatGPT Pro (covers model) | $20 |\n| Total | $26 |"
+  },
+  "createdAt": "2026-03-24"
+}
