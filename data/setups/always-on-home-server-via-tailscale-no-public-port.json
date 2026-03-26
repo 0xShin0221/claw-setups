@@ -1,0 +1,51 @@
+{
+  "id": "always-on-home-server-via-tailscale-no-public-port",
+  "title": "Always-On Home Server via Tailscale (No Public Ports)",
+  "description": "Run OpenClaw on any always-on home machine. Tailscale handles remote access — no port forwarding, no public IP needed. Chat via Telegram from anywhere.",
+  "author": {
+    "name": "community",
+    "github": "community"
+  },
+  "useCase": "personal-assistant",
+  "channels": [
+    "telegram"
+  ],
+  "model": "anthropic/claude-sonnet-4-6",
+  "skills": [
+    "weather",
+    "apple-reminders",
+    "github"
+  ],
+  "likes": 0,
+  "config": {
+    "version": "1.0",
+    "name": "Home Server Assistant",
+    "channels": [
+      {
+        "type": "telegram",
+        "token": "***REDACTED***"
+      }
+    ],
+    "agents": [
+      {
+        "name": "main",
+        "model": "anthropic/claude-sonnet-4-6",
+        "skills": [
+          "weather",
+          "apple-reminders",
+          "github"
+        ],
+        "system_prompt": "You are a personal assistant running on a home server. Always available, concise, reliable.",
+        "memory": {
+          "type": "persistent",
+          "scope": "global"
+        }
+      }
+    ]
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# SOUL.md - Home Server Assistant\n\nYou run 24/7 on a home machine accessed via Tailscale VPN.\n\n## Access\n- Remote control via Telegram\n- Tailscale: private network, no public ports\n\n## Personality\nAlways-on, reliable. Quick on simple tasks, careful on file/external operations.",
+    "AGENTS.md": "# AGENTS.md - Home Server Setup\n\n## Requirements\n- Always-on machine (Mac mini / old PC / Raspberry Pi 4+)\n- Tailscale installed\n- OpenClaw gateway running as system service\n\n## Setup\n1. brew install tailscale and tailscale up\n2. npm install -g openclaw and openclaw onboard --install-daemon\n3. openclaw channels login telegram\n\n## Why Tailscale\n- No port forwarding needed\n- Works behind any NAT\n- Free for personal use (up to 100 devices)"
+  },
+  "createdAt": "2026-03-24"
+}
