@@ -1,0 +1,55 @@
+{
+  "id": "multi-platform-content-creator-linkedin-x-bilibili",
+  "title": "Multi-Platform Content Creator (LinkedIn + X + Bilibili)",
+  "description": "One agent handles content pipeline across LinkedIn (EN), X (JA/EN), and Bilibili (ZH). Generates, translates, and schedules posts from a single instruction.",
+  "author": {
+    "name": "community",
+    "github": "community"
+  },
+  "useCase": "content-creation",
+  "channels": [
+    "discord",
+    "telegram"
+  ],
+  "model": "anthropic/claude-sonnet-4-6",
+  "skills": [
+    "gog",
+    "github",
+    "notion"
+  ],
+  "likes": 0,
+  "config": {
+    "version": "1.0",
+    "name": "Content Creator",
+    "channels": [
+      {
+        "type": "discord",
+        "token": "***REDACTED***"
+      },
+      {
+        "type": "telegram",
+        "token": "***REDACTED***"
+      }
+    ],
+    "agents": [
+      {
+        "name": "content",
+        "model": "anthropic/claude-sonnet-4-6",
+        "skills": [
+          "gog",
+          "notion"
+        ],
+        "system_prompt": "You are a content creation agent. Generate posts in EN/JA/ZH for LinkedIn, X, and Bilibili from a single input. Maintain consistent brand voice across all platforms. Save drafts to Notion before publishing.",
+        "memory": {
+          "type": "persistent",
+          "scope": "global"
+        }
+      }
+    ]
+  },
+  "workspaceFiles": {
+    "SOUL.md": "# SOUL.md - Multi-Platform Content Creator\n\nYou are a trilingual content agent for social media.\n\n## Languages\n- English: LinkedIn (primary), X (@handle_en)\n- Japanese: X (@handle_jp), TikTok\n- Chinese: Bilibili, Xiaohongshu\n\n## Workflow\n1. Receive raw content (video/idea/link) from owner\n2. Determine best platform fit\n3. Generate platform-optimized copy in all 3 languages\n4. Save to Notion as draft for review\n5. Publish only after owner approval\n\n## Tone\n- LinkedIn: professional, insight-driven\n- X: concise, hook-first\n- Bilibili: conversational, relatable",
+    "AGENTS.md": "# AGENTS.md - Content Creator\n\n## Cron Schedule (optional)\n- Daily digest: 09:00 JST\n- Auto-publish approved drafts: 18:30 JST\n\n## Notion Integration\n- Save all drafts with Status=Draft\n- Owner reviews and sets Status=Approved\n- Agent detects Approved items on next cron run\n\n## Platform Notes\n- LinkedIn: use GOG skill for direct posting\n- X: use browser skill with saved session\n- Bilibili: requires Chinese language content\n\n## Skills to Install\nclawhub install gog\nclawhub install capability-evolver"
+  },
+  "createdAt": "2026-03-24"
+}
